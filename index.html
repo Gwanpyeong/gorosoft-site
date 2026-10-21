@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>고로소프트 GOROSOFT</title>
+<meta name="description" content="고로소프트는 iOS·안드로이드 앱을 직접 설계하고 개발하는 소프트웨어 스튜디오입니다. 협업·외주 개발 문의를 받고 있습니다.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
@@ -52,13 +53,38 @@ p{margin:0 0 14px}
 .policy li{margin:2px 0}
 .policy .date{color:var(--muted);font-size:14px}
 footer{margin-top:72px;border-top:1px solid var(--line);padding:24px 0 40px;font:400 13px var(--mono);color:var(--muted)}
+.brand{color:var(--text);text-decoration:none}
+.brand:hover b{color:var(--accent)}
+.right{display:flex;align-items:center;gap:8px 20px;flex-wrap:wrap;justify-content:flex-end}
+.auth{display:flex;gap:8px}
+.btn{font:500 13px var(--mono);border-radius:6px;padding:7px 12px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--text)}
+.btn:hover{border-color:var(--muted)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#1b1306}
+.btn.full{width:100%;padding:11px;margin-top:6px}
+.btn:focus-visible,input:focus-visible,.sw:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:0;width:min(92vw,400px)}
+dialog::backdrop{background:rgba(5,8,16,.72)}
+.dlg{padding:22px;position:relative}
+.dlg h2{margin:0 0 4px;font-size:18px}
+.dlg h2::before{content:"> "}
+.dlg .close{position:absolute;top:14px;right:14px;padding:4px 9px}
+.dlg label{display:block;font:400 13px var(--mono);color:var(--muted);margin:14px 0 6px}
+.dlg input[type=text],.dlg input[type=email],.dlg input[type=password]{width:100%;padding:10px 12px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:400 15px var(--mono)}
+.dlg .agree{display:flex;gap:8px;align-items:flex-start;font:400 14px/1.6 var(--sans);color:var(--muted);margin-top:14px}
+.dlg .agree input{margin-top:5px}
+.dlg .msg{min-height:1.5em;margin:12px 0 0;font-size:14px;color:var(--accent)}
+.dlg .alt{margin:14px 0 0;font-size:14px;color:var(--muted)}
+.sw{background:none;border:0;color:var(--accent);cursor:pointer;font:inherit;text-decoration:underline;padding:0}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="top">
-    <b>gorosoft</b>
-    <nav><a href="#about">소개</a><a href="#contact">문의</a><a href="#privacy">개인정보처리방침</a></nav>
+  <header class="top" id="top">
+    <a class="brand" href="#top"><b>gorosoft</b></a>
+    <div class="right">
+      <nav><a href="#about">소개</a><a href="#contact">문의</a><a href="#privacy">개인정보처리방침</a></nav>
+      <div class="auth"><button type="button" class="btn" data-open="login">로그인</button><button type="button" class="btn pri" data-open="signup">회원가입</button></div>
+    </div>
   </header>
 
   <main>
@@ -70,7 +96,7 @@ footer{margin-top:72px;border-top:1px solid var(--line);padding:24px 0 40px;font
 <pre><span class="k">const</span> <span class="p">gorosoft</span> = {
   <span class="p">name</span>:    <span class="s">"고로소프트"</span>,
   <span class="p">focus</span>:   [<span class="s">"iOS"</span>, <span class="s">"Android"</span>],
-  <span class="p">domain</span>:  <span class="s">"goro.co.kr"</span>,
+  <span class="p">domain</span>:  <span class="s">"gorosoft.co.kr"</span>,
   <span class="p">contact</span>: <span class="s">"cube5828@gorosoft.co.kr"</span>,
   <span class="p">status</span>:  <span class="s">"첫 앱 준비 중"</span>,
 }<span class="caret"></span></pre>
@@ -122,5 +148,64 @@ footer{margin-top:72px;border-top:1px solid var(--line);padding:24px 0 40px;font
 
   <footer>상호 고로소프트 · 대표자 노승현<br>사업자등록번호 672-01-04230<br>전화 010-9439-8428 · 이메일 cube5828@gorosoft.co.kr<br>개인정보보호책임자 노승현<br>© 2026 GOROSOFT. All rights reserved.</footer>
 </div>
+<dialog id="auth" aria-labelledby="authTitle">
+  <div class="dlg">
+    <button type="button" class="btn close" id="authClose" aria-label="닫기">✕</button>
+    <h2 id="authTitle">로그인</h2>
+    <form id="authForm">
+      <div id="idBox"><label for="aId">아이디</label>
+      <input id="aId" type="text" autocomplete="username" minlength="4" maxlength="20" pattern="[A-Za-z0-9_]{4,20}" title="영문, 숫자, 밑줄 4~20자" required></div>
+      <div id="mailBox" hidden><label for="aEmail">이메일</label>
+      <input id="aEmail" type="email" autocomplete="email" disabled></div>
+      <div id="pwBox"><label for="aPw">비밀번호</label>
+      <input id="aPw" type="password" minlength="8" autocomplete="current-password" required></div>
+      <div id="signupOnly" hidden>
+        <label for="aPw2">비밀번호 확인</label>
+        <input id="aPw2" type="password" minlength="8" autocomplete="new-password" disabled>
+        <label class="agree"><input type="checkbox" id="aAgree" disabled><span>개인정보 수집·이용에 동의합니다. (<a href="#privacy" id="aPriv">개인정보처리방침</a>)</span></label>
+      </div>
+      <p class="msg" id="authMsg" role="status"></p>
+      <button type="submit" class="btn pri full" id="authSubmit">로그인</button>
+      <p class="alt" id="authAlt"></p>
+    </form>
+  </div>
+</dialog>
+<script>
+(function(){
+  var dlg=document.getElementById('auth'),form=document.getElementById('authForm');
+  var msg=document.getElementById('authMsg'),pw=document.getElementById('aPw'),pw2=document.getElementById('aPw2');
+  var agree=document.getElementById('aAgree'),box=document.getElementById('signupOnly');
+  var mode='login',pwBox=document.getElementById('pwBox'),idBox=document.getElementById('idBox'),idIn=document.getElementById('aId'),mailBox=document.getElementById('mailBox'),mailIn=document.getElementById('aEmail');
+  function setMode(m){
+    mode=m;var s=m==='signup',r=m==='reset',f=m==='findid',idOn=!f,mailOn=s||r||f,pwOn=!(r||f);
+    idBox.hidden=!idOn;idIn.disabled=!idOn;idIn.required=idOn;
+    mailBox.hidden=!mailOn;mailIn.disabled=!mailOn;mailIn.required=mailOn;
+    pwBox.hidden=!pwOn;pw.disabled=!pwOn;pw.required=pwOn;
+    document.getElementById('authTitle').textContent=s?'회원가입':r?'비밀번호 찾기':f?'아이디 찾기':'로그인';
+    document.getElementById('authSubmit').textContent=s?'가입하기':r?'재설정 메일 받기':f?'아이디 메일로 받기':'로그인';
+    box.hidden=!s;pw2.disabled=!s;pw2.required=s;agree.disabled=!s;agree.required=s;
+    pw.autocomplete=s?'new-password':'current-password';
+    document.getElementById('authAlt').innerHTML=s
+      ?'이미 계정이 있나요? <button type="button" class="sw" data-mode="login">로그인</button>'
+      :(r||f)?'<button type="button" class="sw" data-mode="login">로그인으로 돌아가기</button>'
+      :'계정이 없나요? <button type="button" class="sw" data-mode="signup">회원가입</button> · <button type="button" class="sw" data-mode="reset">비밀번호 찾기</button> · <button type="button" class="sw" data-mode="findid">아이디 찾기</button>';
+    msg.textContent='';
+  }
+  document.querySelectorAll('[data-open]').forEach(function(b){
+    b.addEventListener('click',function(){form.reset();setMode(b.getAttribute('data-open'));dlg.showModal();});
+  });
+  document.getElementById('authAlt').addEventListener('click',function(e){
+    var t=e.target.closest('[data-mode]');if(t){setMode(t.getAttribute('data-mode'));}
+  });
+  document.getElementById('authClose').addEventListener('click',function(){dlg.close();});
+  document.getElementById('aPriv').addEventListener('click',function(){dlg.close();});
+  dlg.addEventListener('click',function(e){if(e.target===dlg){dlg.close();}});
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    if(mode==='signup'&&pw.value!==pw2.value){msg.textContent='비밀번호가 서로 다릅니다.';return;}
+    msg.textContent='회원 기능은 현재 준비 중입니다.';
+  });
+})();
+</script>
 </body>
 </html>
