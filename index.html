@@ -96,6 +96,9 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
 .dlg .agree input{margin-top:5px}
 .dlg .msg{min-height:1.5em;margin:12px 0 0;font-size:14px;color:var(--accent)}
 .dlg .msg.ok{color:var(--str)}
+.dlg .hint{min-height:1.4em;margin:6px 0 0;font-size:13px}
+.dlg .hint.ok{color:var(--str)}
+.dlg .hint.bad{color:#ff8a80}
 .dlg .alt{margin:14px 0 0;font-size:14px;color:var(--muted)}
 .sw{background:none;border:0;color:var(--accent);cursor:pointer;font:inherit;text-decoration:underline;padding:0}
 </style>
@@ -156,6 +159,7 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
       <div id="signupOnly" hidden>
         <label for="aPw2">비밀번호 확인</label>
         <input id="aPw2" type="password" minlength="8" autocomplete="new-password" disabled>
+        <p class="hint" id="pwMatch" role="status" aria-live="polite"></p>
         <label class="agree"><input type="checkbox" id="aAgree" disabled><span>개인정보 수집·이용 및 국외 이전(Google Firebase)에 동의합니다. (<a href="/privacy/" target="_blank" rel="noopener">개인정보처리방침</a>)</span></label>
       </div>
       <p class="msg" id="authMsg" role="status"></p>
@@ -189,6 +193,17 @@ let mode = 'login', fb = null, auth = null;
 
 function setMsg(text, ok) { msg.textContent = text || ''; msg.classList.toggle('ok', !!ok); }
 
+/* 비밀번호 확인 칸: 입력하는 동안 일치 여부를 바로 알려 줍니다 */
+const pwMatch = $('pwMatch');
+function checkMatch() {
+  if (mode !== 'signup' || !pw2.value) { pwMatch.textContent = ''; pwMatch.className = 'hint'; return; }
+  const same = pw.value === pw2.value;
+  pwMatch.textContent = same ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.';
+  pwMatch.className = 'hint ' + (same ? 'ok' : 'bad');
+}
+pw.addEventListener('input', checkMatch);
+pw2.addEventListener('input', checkMatch);
+
 function setMode(m) {
   mode = m;
   const s = m === 'signup', r = m === 'reset';
@@ -203,6 +218,7 @@ function setMode(m) {
       ? '<button type="button" class="sw" data-mode="login">로그인으로 돌아가기</button>'
       : '계정이 없나요? <button type="button" class="sw" data-mode="signup">회원가입</button> · <button type="button" class="sw" data-mode="reset">비밀번호 찾기</button>';
   setMsg('');
+  checkMatch();
 }
 
 function setBusy(b) {
