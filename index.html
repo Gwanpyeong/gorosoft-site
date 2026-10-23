@@ -7,6 +7,24 @@
 <meta name="description" content="고로소프트는 iOS·안드로이드 앱을 직접 설계하고 개발하는 소프트웨어 스튜디오입니다. 협업·외주 개발 문의를 받고 있습니다.">
 <meta name="naver-site-verification" content="d6ccca8cb584293f6bb3da602e902eb78f99a67e" />
 <link rel="canonical" href="https://gorosoft.co.kr/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0c1220">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="고로소프트 GOROSOFT">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:title" content="고로소프트 GOROSOFT">
+<meta property="og:description" content="작게 만들고, 끝까지 다듬습니다. iOS·안드로이드 앱을 직접 설계하고 개발하는 소프트웨어 스튜디오.">
+<meta property="og:url" content="https://gorosoft.co.kr/">
+<meta property="og:image" content="https://gorosoft.co.kr/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="고로소프트 GOROSOFT - 작게 만들고, 끝까지 다듬습니다.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="고로소프트 GOROSOFT">
+<meta name="twitter:description" content="작게 만들고, 끝까지 다듬습니다. iOS·안드로이드 앱을 직접 설계하고 개발하는 소프트웨어 스튜디오.">
+<meta name="twitter:image" content="https://gorosoft.co.kr/og-image.png">
+<script>if(location.hash==='#privacy'){location.replace('/privacy/');}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
@@ -22,6 +40,7 @@
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
 *,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none !important}
 html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.75 var(--sans)}
 a{color:var(--accent);text-underline-offset:3px}
@@ -50,17 +69,17 @@ p{margin:0 0 14px}
 .row{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;border-left:3px solid var(--accent);padding:6px 0 6px 16px}
 .row span{font:400 13px var(--mono);color:var(--muted);min-width:5.5em}
 .row a{font:500 17px var(--mono);word-break:break-all}
-.policy h3{font:600 16px var(--sans);margin:26px 0 6px}
-.policy ul{margin:0 0 8px;padding-left:20px}
-.policy li{margin:2px 0}
-.policy .date{color:var(--muted);font-size:14px}
 footer{margin-top:72px;border-top:1px solid var(--line);padding:24px 0 40px;font:400 13px var(--mono);color:var(--muted)}
+footer a{color:var(--muted)}
 .brand{color:var(--text);text-decoration:none}
 .brand:hover b{color:var(--accent)}
 .right{display:flex;align-items:center;gap:8px 20px;flex-wrap:wrap;justify-content:flex-end}
-.auth{display:flex;gap:8px}
+.auth,.user{display:flex;align-items:center;gap:8px}
+.user{font:400 13px var(--mono);color:var(--muted)}
+.user span{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .btn{font:500 13px var(--mono);border-radius:6px;padding:7px 12px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--text)}
 .btn:hover{border-color:var(--muted)}
+.btn:disabled{opacity:.6;cursor:progress}
 .btn.pri{background:var(--accent);border-color:var(--accent);color:#1b1306}
 .btn.full{width:100%;padding:11px;margin-top:6px}
 .btn:focus-visible,input:focus-visible,.sw:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -75,6 +94,7 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
 .dlg .agree{display:flex;gap:8px;align-items:flex-start;font:400 14px/1.6 var(--sans);color:var(--muted);margin-top:14px}
 .dlg .agree input{margin-top:5px}
 .dlg .msg{min-height:1.5em;margin:12px 0 0;font-size:14px;color:var(--accent)}
+.dlg .msg.ok{color:var(--str)}
 .dlg .alt{margin:14px 0 0;font-size:14px;color:var(--muted)}
 .sw{background:none;border:0;color:var(--accent);cursor:pointer;font:inherit;text-decoration:underline;padding:0}
 </style>
@@ -84,8 +104,9 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
   <header class="top" id="top">
     <a class="brand" href="#top"><b>gorosoft</b></a>
     <div class="right">
-      <nav><a href="#about">소개</a><a href="#contact">문의</a><a href="#privacy">개인정보처리방침</a></nav>
-      <div class="auth"><button type="button" class="btn" data-open="login">로그인</button><button type="button" class="btn pri" data-open="signup">회원가입</button></div>
+      <nav><a href="#about">소개</a><a href="#contact">문의</a><a href="/privacy/">개인정보처리방침</a></nav>
+      <div class="auth" id="authBar"><button type="button" class="btn" data-open="login">로그인</button><button type="button" class="btn pri" data-open="signup">회원가입</button></div>
+      <div class="user" id="userBar" hidden><span id="userEmail"></span><button type="button" class="btn" id="logoutBtn">로그아웃</button></div>
     </div>
   </header>
 
@@ -118,53 +139,23 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
         <div class="row"><span>전화</span><a href="tel:+821094398428">010-9439-8428</a></div>
       </div>
     </section>
-
-    <section id="privacy" class="policy">
-      <h2>개인정보처리방침</h2>
-      <p class="date">시행일: 2026년 10월 21일</p>
-      <p>고로소프트(이하 “회사”)는 이용자의 개인정보를 소중히 다루며, 관련 법령을 준수합니다.</p>
-
-      <h3>수집하는 개인정보</h3>
-      <ul>
-        <li>문의 시 이용자가 직접 보내는 이메일 주소, 이름, 문의 내용</li>
-        <li>앱에서 별도로 수집하는 항목이 있는 경우, 해당 앱의 화면과 스토어 설명에 따로 안내합니다.</li>
-      </ul>
-
-      <h3>이용 목적</h3>
-      <p>문의에 대한 답변, 서비스 제공 및 개선, 공지 전달에만 사용합니다.</p>
-
-      <h3>보유 및 이용 기간</h3>
-      <p>이용 목적이 달성되면 지체 없이 파기합니다. 다만 법령에서 보관을 요구하는 경우 해당 기간 동안 보관합니다.</p>
-
-      <h3>제3자 제공 및 처리 위탁</h3>
-      <p>이용자의 동의가 있거나 법령에 근거가 있는 경우를 제외하고, 개인정보를 외부에 제공하지 않습니다.</p>
-
-      <h3>이용자의 권리</h3>
-      <p>이용자는 언제든지 자신의 개인정보에 대한 열람, 정정, 삭제, 처리 정지를 요청할 수 있습니다. 아래 연락처로 요청해 주세요.</p>
-
-      <h3>개인정보 보호책임자 및 문의</h3>
-      <p>개인정보 보호책임자: 노승현</p>
-      <p>이메일 <a href="mailto:cube5828@gorosoft.co.kr">cube5828@gorosoft.co.kr</a><br>전화 010-9439-8428</p>
-    </section>
   </main>
 
-  <footer>상호 고로소프트 · 대표자 노승현<br>사업자등록번호 672-01-04230<br>전화 010-9439-8428 · 이메일 cube5828@gorosoft.co.kr<br>개인정보보호책임자 노승현<br>© 2026 GOROSOFT. All rights reserved.</footer>
+  <footer>상호 고로소프트 · 대표자 노승현<br>사업자등록번호 672-01-04230<br>전화 010-9439-8428 · 이메일 cube5828@gorosoft.co.kr<br>개인정보보호책임자 노승현<br><a href="/privacy/">개인정보처리방침</a><br>© 2026 GOROSOFT. All rights reserved.</footer>
 </div>
 <dialog id="auth" aria-labelledby="authTitle">
   <div class="dlg">
     <button type="button" class="btn close" id="authClose" aria-label="닫기">✕</button>
     <h2 id="authTitle">로그인</h2>
     <form id="authForm">
-      <div id="idBox"><label for="aId">아이디</label>
-      <input id="aId" type="text" autocomplete="username" minlength="4" maxlength="20" pattern="[A-Za-z0-9_]{4,20}" title="영문, 숫자, 밑줄 4~20자" required></div>
-      <div id="mailBox" hidden><label for="aEmail">이메일</label>
-      <input id="aEmail" type="email" autocomplete="email" disabled></div>
+      <div><label for="aEmail">이메일</label>
+      <input id="aEmail" type="email" autocomplete="email" required></div>
       <div id="pwBox"><label for="aPw">비밀번호</label>
       <input id="aPw" type="password" minlength="8" autocomplete="current-password" required></div>
       <div id="signupOnly" hidden>
         <label for="aPw2">비밀번호 확인</label>
         <input id="aPw2" type="password" minlength="8" autocomplete="new-password" disabled>
-        <label class="agree"><input type="checkbox" id="aAgree" disabled><span>개인정보 수집·이용에 동의합니다. (<a href="#privacy" id="aPriv">개인정보처리방침</a>)</span></label>
+        <label class="agree"><input type="checkbox" id="aAgree" disabled><span>개인정보 수집·이용 및 국외 이전(Google Firebase)에 동의합니다. (<a href="/privacy/" target="_blank" rel="noopener">개인정보처리방침</a>)</span></label>
       </div>
       <p class="msg" id="authMsg" role="status"></p>
       <button type="submit" class="btn pri full" id="authSubmit">로그인</button>
@@ -172,42 +163,132 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
     </form>
   </div>
 </dialog>
-<script>
-(function(){
-  var dlg=document.getElementById('auth'),form=document.getElementById('authForm');
-  var msg=document.getElementById('authMsg'),pw=document.getElementById('aPw'),pw2=document.getElementById('aPw2');
-  var agree=document.getElementById('aAgree'),box=document.getElementById('signupOnly');
-  var mode='login',pwBox=document.getElementById('pwBox'),idBox=document.getElementById('idBox'),idIn=document.getElementById('aId'),mailBox=document.getElementById('mailBox'),mailIn=document.getElementById('aEmail');
-  function setMode(m){
-    mode=m;var s=m==='signup',r=m==='reset',f=m==='findid',idOn=!f,mailOn=s||r||f,pwOn=!(r||f);
-    idBox.hidden=!idOn;idIn.disabled=!idOn;idIn.required=idOn;
-    mailBox.hidden=!mailOn;mailIn.disabled=!mailOn;mailIn.required=mailOn;
-    pwBox.hidden=!pwOn;pw.disabled=!pwOn;pw.required=pwOn;
-    document.getElementById('authTitle').textContent=s?'회원가입':r?'비밀번호 찾기':f?'아이디 찾기':'로그인';
-    document.getElementById('authSubmit').textContent=s?'가입하기':r?'재설정 메일 받기':f?'아이디 메일로 받기':'로그인';
-    box.hidden=!s;pw2.disabled=!s;pw2.required=s;agree.disabled=!s;agree.required=s;
-    pw.autocomplete=s?'new-password':'current-password';
-    document.getElementById('authAlt').innerHTML=s
-      ?'이미 계정이 있나요? <button type="button" class="sw" data-mode="login">로그인</button>'
-      :(r||f)?'<button type="button" class="sw" data-mode="login">로그인으로 돌아가기</button>'
-      :'계정이 없나요? <button type="button" class="sw" data-mode="signup">회원가입</button> · <button type="button" class="sw" data-mode="reset">비밀번호 찾기</button> · <button type="button" class="sw" data-mode="findid">아이디 찾기</button>';
-    msg.textContent='';
+<script type="module">
+/* ── Firebase 설정 ──────────────────────────────────────────────
+   Firebase 콘솔 > 프로젝트 설정 > 내 앱(웹)의 firebaseConfig 값을 그대로 붙여 넣으세요.
+   이 값은 웹용 공개 설정값이라 코드에 들어가도 괜찮습니다. (비밀 키가 아닙니다)
+   apiKey가 비어 있으면 회원 기능은 "준비 중" 안내만 표시합니다. */
+const firebaseConfig = {
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
+};
+const SDK = "https://www.gstatic.com/firebasejs/10.14.1/";
+/* ──────────────────────────────────────────────────────────── */
+
+const configured = !!(firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId);
+const $ = (id) => document.getElementById(id);
+const dlg = $('auth'), form = $('authForm'), msg = $('authMsg');
+const emailIn = $('aEmail'), pw = $('aPw'), pw2 = $('aPw2'), agree = $('aAgree');
+const pwBox = $('pwBox'), signupBox = $('signupOnly'), submitBtn = $('authSubmit');
+let mode = 'login', fb = null, auth = null;
+
+function setMsg(text, ok) { msg.textContent = text || ''; msg.classList.toggle('ok', !!ok); }
+
+function setMode(m) {
+  mode = m;
+  const s = m === 'signup', r = m === 'reset';
+  pwBox.hidden = r; pw.disabled = r; pw.required = !r;
+  signupBox.hidden = !s; pw2.disabled = !s; pw2.required = s; agree.disabled = !s; agree.required = s;
+  pw.autocomplete = s ? 'new-password' : 'current-password';
+  $('authTitle').textContent = s ? '회원가입' : r ? '비밀번호 찾기' : '로그인';
+  submitBtn.textContent = s ? '가입하기' : r ? '재설정 메일 받기' : '로그인';
+  $('authAlt').innerHTML = s
+    ? '이미 계정이 있나요? <button type="button" class="sw" data-mode="login">로그인</button>'
+    : r
+      ? '<button type="button" class="sw" data-mode="login">로그인으로 돌아가기</button>'
+      : '계정이 없나요? <button type="button" class="sw" data-mode="signup">회원가입</button> · <button type="button" class="sw" data-mode="reset">비밀번호 찾기</button>';
+  setMsg('');
+}
+
+function setBusy(b) {
+  submitBtn.disabled = b;
+  if (b) submitBtn.textContent = '처리 중…';
+  else setMode(mode);
+}
+
+function errText(err) {
+  switch (err && err.code) {
+    case 'auth/email-already-in-use': return '이미 가입된 이메일입니다. 로그인하거나 비밀번호 찾기를 이용해 주세요.';
+    case 'auth/invalid-email': return '이메일 형식이 올바르지 않습니다.';
+    case 'auth/weak-password': return '비밀번호가 너무 쉽습니다. 8자 이상으로 더 복잡하게 만들어 주세요.';
+    case 'auth/invalid-credential':
+    case 'auth/wrong-password':
+    case 'auth/user-not-found': return '이메일 또는 비밀번호가 올바르지 않습니다.';
+    case 'auth/user-disabled': return '사용이 중지된 계정입니다. 문의해 주세요.';
+    case 'auth/too-many-requests': return '시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.';
+    case 'auth/network-request-failed': return '네트워크 연결을 확인해 주세요.';
+    case 'auth/operation-not-allowed': return '이메일 로그인이 아직 활성화되지 않았습니다. 관리자에게 문의해 주세요.';
+    default: return '처리 중 문제가 생겼습니다. 잠시 후 다시 시도해 주세요.';
   }
-  document.querySelectorAll('[data-open]').forEach(function(b){
-    b.addEventListener('click',function(){form.reset();setMode(b.getAttribute('data-open'));dlg.showModal();});
-  });
-  document.getElementById('authAlt').addEventListener('click',function(e){
-    var t=e.target.closest('[data-mode]');if(t){setMode(t.getAttribute('data-mode'));}
-  });
-  document.getElementById('authClose').addEventListener('click',function(){dlg.close();});
-  document.getElementById('aPriv').addEventListener('click',function(){dlg.close();});
-  dlg.addEventListener('click',function(e){if(e.target===dlg){dlg.close();}});
-  form.addEventListener('submit',function(e){
-    e.preventDefault();
-    if(mode==='signup'&&pw.value!==pw2.value){msg.textContent='비밀번호가 서로 다릅니다.';return;}
-    msg.textContent='회원 기능은 현재 준비 중입니다.';
-  });
-})();
+}
+
+async function loadFirebase() {
+  if (fb) return fb;
+  const [appMod, authMod] = await Promise.all([
+    import(SDK + 'firebase-app.js'),
+    import(SDK + 'firebase-auth.js')
+  ]);
+  auth = authMod.getAuth(appMod.initializeApp(firebaseConfig));
+  auth.languageCode = 'ko';
+  fb = authMod;
+  return fb;
+}
+
+/* 로그인 상태를 헤더에 반영 */
+function renderUser(user) {
+  $('authBar').hidden = !!user;
+  $('userBar').hidden = !user;
+  $('userEmail').textContent = user ? (user.email || '') : '';
+}
+if (configured) {
+  loadFirebase().then((a) => a.onAuthStateChanged(auth, renderUser)).catch(() => {});
+}
+
+document.querySelectorAll('[data-open]').forEach((b) => {
+  b.addEventListener('click', () => { form.reset(); setMode(b.getAttribute('data-open')); dlg.showModal(); });
+});
+$('authAlt').addEventListener('click', (e) => {
+  const t = e.target.closest('[data-mode]'); if (t) setMode(t.getAttribute('data-mode'));
+});
+$('authClose').addEventListener('click', () => dlg.close());
+dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+
+$('logoutBtn').addEventListener('click', async () => {
+  try { const a = await loadFirebase(); await a.signOut(auth); } catch (_) {}
+});
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!configured) { setMsg('회원 기능은 현재 준비 중입니다.'); return; }
+  const email = emailIn.value.trim(), pass = pw.value;
+  if (mode === 'signup' && pass !== pw2.value) { setMsg('비밀번호가 서로 다릅니다.'); return; }
+  setBusy(true);
+  let done = '';
+  try {
+    const a = await loadFirebase();
+    if (mode === 'signup') {
+      const cred = await a.createUserWithEmailAndPassword(auth, email, pass);
+      try { await a.sendEmailVerification(cred.user); } catch (_) {}
+      done = '가입이 완료되었습니다. 인증 메일을 보냈으니 메일함(스팸함 포함)을 확인해 주세요.';
+    } else if (mode === 'reset') {
+      await a.sendPasswordResetEmail(auth, email);
+      done = '재설정 메일을 보냈습니다. 메일함(스팸함 포함)을 확인해 주세요.';
+    } else {
+      await a.signInWithEmailAndPassword(auth, email, pass);
+      dlg.close();
+    }
+  } catch (err) {
+    setBusy(false);
+    setMsg(errText(err));
+    return;
+  }
+  setBusy(false);
+  if (done) setMsg(done, true);
+});
 </script>
 </body>
 </html>
