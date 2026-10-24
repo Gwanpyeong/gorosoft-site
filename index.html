@@ -100,6 +100,8 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
 .dlg .hint.ok{color:var(--str)}
 .dlg .hint.bad{color:#ff8a80}
 .dlg .alt{margin:14px 0 0;font-size:14px;color:var(--muted)}
+.dlg .sep{border-top:1px solid var(--line);margin:22px 0 2px}
+.dlg .alt{word-break:break-all}
 .sw{background:none;border:0;color:var(--accent);cursor:pointer;font:inherit;text-decoration:underline;padding:0}
 </style>
 </head>
@@ -110,7 +112,7 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
     <div class="right">
       <nav><a href="#about">소개</a><a href="#contact">문의</a><a href="/privacy/">개인정보처리방침</a></nav>
       <div class="auth" id="authBar"><button type="button" class="btn" data-open="login">로그인</button><button type="button" class="btn pri" data-open="signup">회원가입</button></div>
-      <div class="user" id="userBar" hidden><span id="userEmail"></span><button type="button" class="btn" id="logoutBtn">로그아웃</button></div>
+      <div class="user" id="userBar" hidden><span id="userEmail"></span><button type="button" class="btn" id="myBtn">마이페이지</button><button type="button" class="btn" id="logoutBtn">로그아웃</button></div>
     </div>
   </header>
 
@@ -152,7 +154,9 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
     <button type="button" class="btn close" id="authClose" aria-label="닫기">✕</button>
     <h2 id="authTitle">로그인</h2>
     <form id="authForm">
-      <div><label for="aEmail">이메일</label>
+      <div id="nameBox" hidden><label for="aName">이름</label>
+      <input id="aName" type="text" maxlength="20" autocomplete="name" disabled></div>
+      <div><label for="aEmail">이메일 (로그인 아이디로 사용)</label>
       <input id="aEmail" type="email" autocomplete="email" required></div>
       <div id="pwBox"><label for="aPw">비밀번호</label>
       <input id="aPw" type="password" minlength="8" autocomplete="current-password" required></div>
@@ -163,8 +167,34 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
         <label class="agree"><input type="checkbox" id="aAgree" disabled><span>개인정보 수집·이용 및 국외 이전(Google Firebase)에 동의합니다. (<a href="/privacy/" target="_blank" rel="noopener">개인정보처리방침</a>)</span></label>
       </div>
       <p class="msg" id="authMsg" role="status"></p>
+      <p class="alt" id="resendBox" hidden><button type="button" class="sw" id="resendBtn">인증 메일 다시 보내기</button></p>
       <button type="submit" class="btn pri full" id="authSubmit">로그인</button>
       <p class="alt" id="authAlt"></p>
+    </form>
+  </div>
+</dialog>
+<dialog id="mypage" aria-labelledby="myTitle">
+  <div class="dlg">
+    <button type="button" class="btn close" id="myClose" aria-label="닫기">✕</button>
+    <h2 id="myTitle">마이페이지</h2>
+    <p class="alt" id="myEmail"></p>
+    <form id="nameForm">
+      <label for="mName">이름</label>
+      <input id="mName" type="text" maxlength="20" autocomplete="name" required>
+      <button type="submit" class="btn full" id="nameSubmit">이름 변경</button>
+      <p class="msg" id="nameMsg" role="status"></p>
+    </form>
+    <div class="sep"></div>
+    <form id="pwForm">
+      <label for="mCur">현재 비밀번호</label>
+      <input id="mCur" type="password" autocomplete="current-password" required>
+      <label for="mNew">새 비밀번호</label>
+      <input id="mNew" type="password" minlength="8" autocomplete="new-password" required>
+      <label for="mNew2">새 비밀번호 확인</label>
+      <input id="mNew2" type="password" minlength="8" autocomplete="new-password" required>
+      <p class="hint" id="npMatch" role="status" aria-live="polite"></p>
+      <button type="submit" class="btn full" id="pwSubmit">비밀번호 변경</button>
+      <p class="msg" id="pwMsg" role="status"></p>
     </form>
   </div>
 </dialog>
@@ -182,41 +212,51 @@ const firebaseConfig = {
   appId: "1:330574973161:web:9c62c89a38a0bcbea38878"
 };
 const SDK = "https://www.gstatic.com/firebasejs/10.14.1/";
+/* 인증 메일의 링크를 누른 뒤 돌아올 주소 (승인된 도메인이어야 합니다) */
+const VERIFY_URL = "https://gorosoft.co.kr/?verified=1";
 /* ──────────────────────────────────────────────────────────── */
 
 const configured = !!(firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId);
 const $ = (id) => document.getElementById(id);
-const dlg = $('auth'), form = $('authForm'), msg = $('authMsg');
-const emailIn = $('aEmail'), pw = $('aPw'), pw2 = $('aPw2'), agree = $('aAgree');
-const pwBox = $('pwBox'), signupBox = $('signupOnly'), submitBtn = $('authSubmit');
+const dlg = $('auth'), form = $('authForm'), msg = $('authMsg'), my = $('mypage');
+const nameIn = $('aName'), emailIn = $('aEmail'), pw = $('aPw'), pw2 = $('aPw2'), agree = $('aAgree');
+const nameBox = $('nameBox'), pwBox = $('pwBox'), signupBox = $('signupOnly');
+const submitBtn = $('authSubmit'), resendBox = $('resendBox');
 let mode = 'login', fb = null, auth = null;
 
-function setMsg(text, ok) { msg.textContent = text || ''; msg.classList.toggle('ok', !!ok); }
+function say(el, text, ok) { el.textContent = text || ''; el.classList.toggle('ok', !!ok); }
+function setMsg(text, ok) { say(msg, text, ok); }
 
 /* 비밀번호 확인 칸: 입력하는 동안 일치 여부를 바로 알려 줍니다 */
-const pwMatch = $('pwMatch');
-function checkMatch() {
-  if (mode !== 'signup' || !pw2.value) { pwMatch.textContent = ''; pwMatch.className = 'hint'; return; }
-  const same = pw.value === pw2.value;
-  pwMatch.textContent = same ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.';
-  pwMatch.className = 'hint ' + (same ? 'ok' : 'bad');
+function matchHint(a, b, el, active) {
+  if (!active || !b.value) { el.textContent = ''; el.className = 'hint'; return; }
+  const same = a.value === b.value;
+  el.textContent = same ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.';
+  el.className = 'hint ' + (same ? 'ok' : 'bad');
 }
+const pwMatch = $('pwMatch');
+const checkMatch = () => matchHint(pw, pw2, pwMatch, mode === 'signup');
 pw.addEventListener('input', checkMatch);
 pw2.addEventListener('input', checkMatch);
+const checkNewMatch = () => matchHint($('mNew'), $('mNew2'), $('npMatch'), true);
+$('mNew').addEventListener('input', checkNewMatch);
+$('mNew2').addEventListener('input', checkNewMatch);
 
 function setMode(m) {
   mode = m;
   const s = m === 'signup', r = m === 'reset';
+  nameBox.hidden = !s; nameIn.disabled = !s; nameIn.required = s;
   pwBox.hidden = r; pw.disabled = r; pw.required = !r;
   signupBox.hidden = !s; pw2.disabled = !s; pw2.required = s; agree.disabled = !s; agree.required = s;
   pw.autocomplete = s ? 'new-password' : 'current-password';
   $('authTitle').textContent = s ? '회원가입' : r ? '비밀번호 찾기' : '로그인';
-  submitBtn.textContent = s ? '가입하기' : r ? '재설정 메일 받기' : '로그인';
+  submitBtn.textContent = s ? '인증 메일 받고 가입하기' : r ? '재설정 링크 메일 받기' : '로그인';
   $('authAlt').innerHTML = s
     ? '이미 계정이 있나요? <button type="button" class="sw" data-mode="login">로그인</button>'
     : r
       ? '<button type="button" class="sw" data-mode="login">로그인으로 돌아가기</button>'
       : '계정이 없나요? <button type="button" class="sw" data-mode="signup">회원가입</button> · <button type="button" class="sw" data-mode="reset">비밀번호 찾기</button>';
+  resendBox.hidden = true;
   setMsg('');
   checkMatch();
 }
@@ -229,7 +269,7 @@ function setBusy(b) {
 
 function errText(err) {
   switch (err && err.code) {
-    case 'auth/email-already-in-use': return '이미 가입된 이메일입니다. 로그인하거나 비밀번호 찾기를 이용해 주세요.';
+    case 'auth/email-already-in-use': return '이미 가입된 이메일입니다. 로그인하거나 비밀번호 찾기를 이용해 주세요. 인증을 아직 안 했다면 로그인 화면에서 인증 메일을 다시 받을 수 있습니다.';
     case 'auth/invalid-email': return '이메일 형식이 올바르지 않습니다.';
     case 'auth/weak-password': return '비밀번호가 너무 쉽습니다. 8자 이상으로 더 복잡하게 만들어 주세요.';
     case 'auth/invalid-credential':
@@ -239,6 +279,7 @@ function errText(err) {
     case 'auth/too-many-requests': return '시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.';
     case 'auth/network-request-failed': return '네트워크 연결을 확인해 주세요.';
     case 'auth/operation-not-allowed': return '이메일 로그인이 아직 활성화되지 않았습니다. 관리자에게 문의해 주세요.';
+    case 'auth/requires-recent-login': return '보안을 위해 다시 로그인한 뒤 시도해 주세요.';
     default: return '처리 중 문제가 생겼습니다. 잠시 후 다시 시도해 주세요.';
   }
 }
@@ -255,15 +296,23 @@ async function loadFirebase() {
   return fb;
 }
 
-/* 로그인 상태를 헤더에 반영 */
+/* 이메일 인증을 마친 계정만 "로그인됨"으로 보여 줍니다 */
 function renderUser(user) {
-  $('authBar').hidden = !!user;
-  $('userBar').hidden = !user;
-  $('userEmail').textContent = user ? (user.email || '') : '';
+  const u = user && user.emailVerified ? user : null;
+  $('authBar').hidden = !!u;
+  $('userBar').hidden = !u;
+  $('userEmail').textContent = u ? (u.displayName || u.email || '') : '';
+  $('userEmail').title = u ? (u.email || '') : '';
 }
 if (configured) {
   loadFirebase().then((a) => a.onAuthStateChanged(auth, renderUser)).catch(() => {});
 }
+
+/* 인증 전 상태로 남은 세션은 창을 닫을 때 정리합니다 */
+async function dropUnverified() {
+  try { if (auth && auth.currentUser && !auth.currentUser.emailVerified) await fb.signOut(auth); } catch (_) {}
+}
+dlg.addEventListener('close', dropUnverified);
 
 document.querySelectorAll('[data-open]').forEach((b) => {
   b.addEventListener('click', () => { form.reset(); setMode(b.getAttribute('data-open')); dlg.showModal(); });
@@ -278,25 +327,48 @@ $('logoutBtn').addEventListener('click', async () => {
   try { const a = await loadFirebase(); await a.signOut(auth); } catch (_) {}
 });
 
+$('resendBtn').addEventListener('click', async () => {
+  try {
+    const a = await loadFirebase();
+    if (!auth.currentUser) throw new Error('no-user');
+    await a.sendEmailVerification(auth.currentUser, { url: VERIFY_URL });
+    resendBox.hidden = true;
+    setMsg('인증 메일을 다시 보냈습니다. 메일함(스팸함 포함)을 확인해 주세요.', true);
+    await a.signOut(auth);
+  } catch (err) {
+    setMsg(err && err.code ? errText(err) : '메일을 보내지 못했습니다. 다시 로그인해 주세요.');
+  }
+});
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!configured) { setMsg('회원 기능은 현재 준비 중입니다.'); return; }
-  const email = emailIn.value.trim(), pass = pw.value;
-  if (mode === 'signup' && pass !== pw2.value) { setMsg('비밀번호가 서로 다릅니다.'); return; }
+  const email = emailIn.value.trim(), pass = pw.value, name = nameIn.value.trim();
+  if (mode === 'signup') {
+    if (!name) { setMsg('이름을 입력해 주세요.'); return; }
+    if (pass !== pw2.value) { setMsg('비밀번호가 서로 다릅니다.'); return; }
+  }
   setBusy(true);
-  let done = '';
+  let done = '', ok = true, needVerify = false;
   try {
     const a = await loadFirebase();
     if (mode === 'signup') {
       const cred = await a.createUserWithEmailAndPassword(auth, email, pass);
-      try { await a.sendEmailVerification(cred.user); } catch (_) {}
-      done = '가입이 완료되었습니다. 인증 메일을 보냈으니 메일함(스팸함 포함)을 확인해 주세요.';
+      try { await a.updateProfile(cred.user, { displayName: name }); } catch (_) {}
+      try { await a.sendEmailVerification(cred.user, { url: VERIFY_URL }); } catch (_) {}
+      await a.signOut(auth);
+      done = '인증 메일을 보냈습니다. 메일의 인증 링크를 누르면 가입이 완료되고, 그 뒤에 로그인할 수 있습니다. (스팸함도 확인해 주세요)';
     } else if (mode === 'reset') {
       await a.sendPasswordResetEmail(auth, email);
-      done = '재설정 메일을 보냈습니다. 메일함(스팸함 포함)을 확인해 주세요.';
+      done = '비밀번호 재설정 링크를 메일로 보냈습니다. 링크에서 새 비밀번호를 정한 뒤 로그인하세요. 로그인 후에는 마이페이지에서 언제든 바꿀 수 있습니다.';
     } else {
-      await a.signInWithEmailAndPassword(auth, email, pass);
-      dlg.close();
+      const cred = await a.signInWithEmailAndPassword(auth, email, pass);
+      if (cred.user.emailVerified) {
+        dlg.close();
+      } else {
+        done = '이메일 인증이 아직 되지 않았습니다. 받은 메일의 인증 링크를 누른 뒤 다시 로그인해 주세요.';
+        ok = false; needVerify = true;
+      }
     }
   } catch (err) {
     setBusy(false);
@@ -304,8 +376,64 @@ form.addEventListener('submit', async (e) => {
     return;
   }
   setBusy(false);
-  if (done) setMsg(done, true);
+  if (done) setMsg(done, ok);
+  resendBox.hidden = !needVerify;
 });
+
+/* ── 마이페이지: 이름·비밀번호 변경 ── */
+$('myBtn').addEventListener('click', () => {
+  const u = auth && auth.currentUser;
+  if (!u) return;
+  $('nameForm').reset(); $('pwForm').reset();
+  $('myEmail').textContent = u.email || '';
+  $('mName').value = u.displayName || '';
+  say($('nameMsg'), ''); say($('pwMsg'), ''); checkNewMatch();
+  my.showModal();
+});
+$('myClose').addEventListener('click', () => my.close());
+my.addEventListener('click', (e) => { if (e.target === my) my.close(); });
+
+$('nameForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const n = $('mName').value.trim();
+  if (!n) { say($('nameMsg'), '이름을 입력해 주세요.'); return; }
+  const btn = $('nameSubmit'); btn.disabled = true;
+  try {
+    const a = await loadFirebase();
+    await a.updateProfile(auth.currentUser, { displayName: n });
+    renderUser(auth.currentUser);
+    say($('nameMsg'), '이름을 변경했습니다.', true);
+  } catch (err) { say($('nameMsg'), errText(err)); }
+  btn.disabled = false;
+});
+
+$('pwForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const cur = $('mCur').value, nw = $('mNew').value;
+  if (nw !== $('mNew2').value) { say($('pwMsg'), '새 비밀번호가 서로 다릅니다.'); return; }
+  if (nw === cur) { say($('pwMsg'), '현재 비밀번호와 다른 비밀번호를 입력해 주세요.'); return; }
+  const btn = $('pwSubmit'); btn.disabled = true;
+  try {
+    const a = await loadFirebase();
+    const u = auth.currentUser;
+    await a.reauthenticateWithCredential(u, a.EmailAuthProvider.credential(u.email, cur));
+    await a.updatePassword(u, nw);
+    $('pwForm').reset(); checkNewMatch();
+    say($('pwMsg'), '비밀번호를 변경했습니다.', true);
+  } catch (err) {
+    const c = err && err.code;
+    say($('pwMsg'), (c === 'auth/invalid-credential' || c === 'auth/wrong-password') ? '현재 비밀번호가 올바르지 않습니다.' : errText(err));
+  }
+  btn.disabled = false;
+});
+
+/* 인증 메일의 링크를 누르고 돌아오면 안내 후 로그인 창을 엽니다 */
+if (new URLSearchParams(location.search).get('verified') === '1') {
+  history.replaceState(null, '', location.pathname + location.hash);
+  form.reset(); setMode('login');
+  setMsg('이메일 인증이 완료되었습니다. 로그인해 주세요.', true);
+  dlg.showModal();
+}
 </script>
 </body>
 </html>
