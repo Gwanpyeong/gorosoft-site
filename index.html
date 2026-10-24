@@ -84,7 +84,7 @@ footer a{color:var(--muted)}
 .btn.pri{background:var(--accent);border-color:var(--accent);color:#1b1306}
 .btn.full{width:100%;padding:11px;margin-top:6px}
 .btn:focus-visible,input:focus-visible,.sw:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:0;width:min(92vw,400px)}
+dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:0;width:min(94vw,440px)}
 dialog::backdrop{background:rgba(5,8,16,.72)}
 .dlg{padding:22px;position:relative}
 .dlg h2{margin:0 0 4px;font-size:18px}
@@ -92,7 +92,7 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
 .dlg .close{position:absolute;top:14px;right:14px;padding:4px 9px}
 .dlg label{display:block;font:400 13px var(--mono);color:var(--muted);margin:14px 0 6px}
 .dlg input[type=text],.dlg input[type=email],.dlg input[type=password]{width:100%;padding:10px 12px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:400 15px var(--mono)}
-.dlg .agree{display:flex;gap:8px;align-items:flex-start;font:400 14px/1.6 var(--sans);color:var(--muted);margin-top:14px}
+.dlg .agree{display:flex;gap:8px;align-items:flex-start;font:400 14px/1.6 var(--sans);color:var(--muted);margin-top:14px;cursor:pointer}
 .dlg .agree input{margin-top:5px}
 .dlg .msg{min-height:1.5em;margin:12px 0 0;font-size:14px;color:var(--accent)}
 .dlg .msg.ok{color:var(--str)}
@@ -100,6 +100,16 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
 .dlg .hint.ok{color:var(--str)}
 .dlg .hint.bad{color:#ff8a80}
 .dlg .alt{margin:14px 0 0;font-size:14px;color:var(--muted)}
+.dlg .tbl{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:14px}
+.dlg .f{display:grid;grid-template-columns:7.4em minmax(0,1fr);align-items:center;gap:10px;background:var(--panel);padding:8px 12px}
+.dlg .f[hidden]{display:none}
+.dlg .f label{margin:0}
+.dlg .f i{color:var(--accent);font-style:normal;margin-left:3px}
+.dlg .f input{padding:8px 10px}
+.dlg .note{margin:10px 0 0;font-size:13px;color:var(--muted)}
+.dlg .agrees{margin-top:10px;border:1px solid var(--line);border-radius:8px;padding:2px 12px 10px}
+.dlg .agrees .agree{margin-top:10px}
+.dlg .agrees .all{padding-bottom:10px;border-bottom:1px solid var(--line)}
 .dlg .sep{border-top:1px solid var(--line);margin:22px 0 2px}
 .dlg .alt{word-break:break-all}
 .sw{background:none;border:0;color:var(--accent);cursor:pointer;font:inherit;text-decoration:underline;padding:0}
@@ -147,24 +157,29 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
     </section>
   </main>
 
-  <footer>상호 고로소프트 · 대표자 노승현<br>사업자등록번호 672-01-04230 <a href="https://hometax.go.kr/websquare/websquare.html?w2xPath=%2Fui%2Fpp%2Findex_pp.xml&amp;tmIdx=43&amp;tm2lIdx=4306000000&amp;tm3lIdx=4306080000" target="_blank" rel="noopener">[사업자등록 조회]</a><br>전화 010-9439-8428 · 이메일 cube5828@gorosoft.co.kr<br>개인정보보호책임자 노승현<br><a href="/privacy/">개인정보처리방침</a><br>© 2026 GOROSOFT. All rights reserved.</footer>
+  <footer>상호 고로소프트 · 대표자 노승현<br>사업자등록번호 672-01-04230 <a href="https://hometax.go.kr/websquare/websquare.html?w2xPath=%2Fui%2Fpp%2Findex_pp.xml&amp;tmIdx=43&amp;tm2lIdx=4306000000&amp;tm3lIdx=4306080000" target="_blank" rel="noopener">[사업자등록 조회]</a><br>전화 010-9439-8428 · 이메일 cube5828@gorosoft.co.kr<br>개인정보보호책임자 노승현<br><a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a><br>© 2026 GOROSOFT. All rights reserved.</footer>
 </div>
 <dialog id="auth" aria-labelledby="authTitle">
   <div class="dlg">
     <button type="button" class="btn close" id="authClose" aria-label="닫기">✕</button>
     <h2 id="authTitle">로그인</h2>
     <form id="authForm">
-      <div id="nameBox" hidden><label for="aName">이름</label>
-      <input id="aName" type="text" maxlength="20" autocomplete="name" disabled></div>
-      <div><label for="aEmail">이메일 (로그인 아이디로 사용)</label>
-      <input id="aEmail" type="email" autocomplete="email" required></div>
-      <div id="pwBox"><label for="aPw">비밀번호</label>
-      <input id="aPw" type="password" minlength="8" autocomplete="current-password" required></div>
-      <div id="signupOnly" hidden>
-        <label for="aPw2">비밀번호 확인</label>
-        <input id="aPw2" type="password" minlength="8" autocomplete="new-password" disabled>
-        <p class="hint" id="pwMatch" role="status" aria-live="polite"></p>
-        <label class="agree"><input type="checkbox" id="aAgree" disabled><span>개인정보 수집·이용 및 국외 이전(Google Firebase)에 동의합니다. (<a href="/privacy/" target="_blank" rel="noopener">개인정보처리방침</a>)</span></label>
+      <div class="tbl">
+        <div class="f" id="nameBox" hidden><label for="aName">이름<i>*</i></label>
+        <input id="aName" type="text" maxlength="20" autocomplete="name" disabled></div>
+        <div class="f"><label for="aEmail">이메일<i>*</i></label>
+        <input id="aEmail" type="email" autocomplete="email" required></div>
+        <div class="f" id="pwBox"><label for="aPw">비밀번호<i>*</i></label>
+        <input id="aPw" type="password" minlength="8" autocomplete="current-password" required></div>
+        <div class="f" id="pw2Box" hidden><label for="aPw2">비밀번호 확인<i>*</i></label>
+        <input id="aPw2" type="password" minlength="8" autocomplete="new-password" disabled></div>
+      </div>
+      <p class="hint" id="pwMatch" role="status" aria-live="polite"></p>
+      <p class="note" id="idNote" hidden>가입한 이메일이 로그인 아이디로 사용됩니다. 비밀번호는 8자 이상이에요.</p>
+      <div class="agrees" id="signupOnly" hidden>
+        <label class="agree all"><input type="checkbox" id="aAll" disabled><span><b>전체 동의</b></span></label>
+        <label class="agree"><input type="checkbox" id="aTerms" disabled><span>[필수] <a href="/terms/" target="_blank" rel="noopener">이용약관</a>에 동의합니다.</span></label>
+        <label class="agree"><input type="checkbox" id="aAgree" disabled><span>[필수] 개인정보 수집·이용 및 국외 이전(Google Firebase)에 동의합니다. (<a href="/privacy/" target="_blank" rel="noopener">개인정보처리방침</a>)</span></label>
       </div>
       <p class="msg" id="authMsg" role="status"></p>
       <p class="alt" id="resendBox" hidden><button type="button" class="sw" id="resendBtn">인증 메일 다시 보내기</button></p>
@@ -215,7 +230,8 @@ const configured = !!(firebaseConfig.apiKey && firebaseConfig.authDomain && fire
 const $ = (id) => document.getElementById(id);
 const dlg = $('auth'), form = $('authForm'), msg = $('authMsg'), my = $('mypage');
 const nameIn = $('aName'), emailIn = $('aEmail'), pw = $('aPw'), pw2 = $('aPw2'), agree = $('aAgree');
-const nameBox = $('nameBox'), pwBox = $('pwBox'), signupBox = $('signupOnly');
+const nameBox = $('nameBox'), pwBox = $('pwBox'), pw2Box = $('pw2Box'), signupBox = $('signupOnly');
+const terms = $('aTerms'), allBox = $('aAll');
 const submitBtn = $('authSubmit'), resendBox = $('resendBox');
 let mode = 'login', fb = null, auth = null;
 
@@ -230,6 +246,9 @@ function matchHint(a, b, el, active) {
   el.className = 'hint ' + (same ? 'ok' : 'bad');
 }
 const pwMatch = $('pwMatch');
+/* 전체 동의 ↔ 개별 동의 */
+allBox.addEventListener('change', () => { agree.checked = terms.checked = allBox.checked; });
+[agree, terms].forEach((c) => c.addEventListener('change', () => { allBox.checked = agree.checked && terms.checked; }));
 const checkMatch = () => matchHint(pw, pw2, pwMatch, mode === 'signup');
 pw.addEventListener('input', checkMatch);
 pw2.addEventListener('input', checkMatch);
@@ -242,7 +261,10 @@ function setMode(m) {
   const s = m === 'signup', r = m === 'reset';
   nameBox.hidden = !s; nameIn.disabled = !s; nameIn.required = s;
   pwBox.hidden = r; pw.disabled = r; pw.required = !r;
-  signupBox.hidden = !s; pw2.disabled = !s; pw2.required = s; agree.disabled = !s; agree.required = s;
+  signupBox.hidden = !s; pw2Box.hidden = !s; $('idNote').hidden = !s;
+  pw2.disabled = !s; pw2.required = s;
+  [agree, terms, allBox].forEach((c) => { c.disabled = !s; });
+  agree.required = s; terms.required = s;
   pw.autocomplete = s ? 'new-password' : 'current-password';
   $('authTitle').textContent = s ? '회원가입' : r ? '비밀번호 찾기' : '로그인';
   submitBtn.textContent = s ? '인증 메일 받고 가입하기' : r ? '재설정 링크 메일 받기' : '로그인';
