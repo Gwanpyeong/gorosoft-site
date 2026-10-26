@@ -75,6 +75,13 @@ section.sec{padding:88px 0 0}
 @media (max-width:860px){.cards{grid-template-columns:1fr}}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px 24px 28px;transition:border-color .2s,transform .2s}
 .card:hover{border-color:var(--accent);transform:translateY(-3px)}
+.goro{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media (max-width:960px){.goro{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.goro{grid-template-columns:1fr}}
+.goro .big{font:800 64px/1 var(--sans);color:var(--accent);margin:0 0 16px;letter-spacing:-.03em}
+.goro h3{font:700 18px/1.35 var(--sans)}
+.goro h3 small{display:block;font:500 14px var(--sans);color:var(--muted);margin-top:2px}
+.sub b{color:var(--text)}
 .card .no{font:600 13px var(--mono);color:var(--accent);margin:0 0 18px}
 .card h3{font:700 20px/1.35 var(--sans);margin:0 0 10px}
 .card p{color:var(--muted);margin:0;font-size:15px}
@@ -147,7 +154,7 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
 <header class="top" id="top">
   <div class="bar">
     <a class="brand" href="#top" aria-label="고로소프트 GOROSOFT 처음으로"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="11.5" fill="#121316"/><path d="M32.72 42.58C41.98 42.58 48.63 36.8 48.63 27.15V22.39H33.13V28.68H40.36C40.26 32.61 37.57 35.06 32.79 35.06C27.33 35.06 24.13 31.01 24.13 23.97C24.13 16.98 27.5 12.98 32.76 12.98C36.33 12.98 38.76 14.75 39.58 17.74H48.24C47.35 10.53 40.92 5.46 32.62 5.46C22.99 5.46 15.37 12.28 15.37 24.09C15.37 35.52 22.38 42.58 32.72 42.58Z" fill="#ffffff"/><rect x="15.37" y="50.75" width="33.26" height="7.80" fill="#b5e04b"/></svg><b>GOROSOFT</b></a>
-    <nav class="main" aria-label="주 메뉴"><a href="#services">서비스</a><a href="#apps">앱</a><a href="#news">소식</a><a href="#contact">문의</a></nav>
+    <nav class="main" aria-label="주 메뉴"><a href="#about">소개</a><a href="#services">서비스</a><a href="#apps">앱</a><a href="#news">소식</a><a href="#contact">문의</a></nav>
     <div class="right">
       <div class="auth" id="authBar"><button type="button" class="btn" data-open="login">로그인</button><button type="button" class="btn pri" data-open="signup">회원가입</button></div>
       <div class="user" id="userBar" hidden><span id="userEmail"></span><button type="button" class="btn" id="myBtn">마이페이지</button><button type="button" class="btn" id="logoutBtn">로그아웃</button></div>
@@ -163,6 +170,18 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
       <div class="deco" aria-hidden="true"></div>
       <p class="lead">고로소프트는 iOS·안드로이드 앱을 기획부터 개발, 출시까지 직접 진행하는 소프트웨어 스튜디오입니다.</p>
       <div class="cta"><a class="btn pri big" href="#apps">앱 보기</a><a class="btn big" href="#contact">개발 문의</a></div>
+    </section>
+
+    <section class="sec" id="about">
+      <p class="tag">ABOUT</p>
+      <h2>고로소프트가 일하는 방식</h2>
+      <p class="sub">고로소프트(GOROSOFT)는 <b>GORO</b>와 <b>SOFT</b>를 합친 이름입니다. GORO는 개발할 때 지키는 네 가지 원칙의 머리글자입니다.</p>
+      <div class="goro">
+        <article class="card"><p class="big" aria-hidden="true">G</p><h3>Growth <small>성장</small></h3><p>고객이 성장하도록 돕는 소프트웨어를 만듭니다.</p></article>
+        <article class="card"><p class="big" aria-hidden="true">O</p><h3>Optimization <small>최적화</small></h3><p>필요한 만큼만, 가장 알맞게 만듭니다.</p></article>
+        <article class="card"><p class="big" aria-hidden="true">R</p><h3>Reliability <small>신뢰성</small></h3><p>오래 믿고 쓸 수 있도록 끝까지 다듬습니다.</p></article>
+        <article class="card"><p class="big" aria-hidden="true">O</p><h3>Originality <small>독창성</small></h3><p>고객의 아이디어를 고유한 앱으로 완성합니다.</p></article>
+      </div>
     </section>
 
     <section class="sec" id="services">
