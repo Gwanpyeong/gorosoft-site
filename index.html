@@ -261,7 +261,7 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
   </div>
 </dialog>
 <script type="module">
-import { firebaseConfig, SDK } from '/firebase-config.js';
+import { firebaseConfig, SDK } from '/firebase-config.js?v=20261026a';
 
 /* 예전 인증 메일의 링크(?verified=1)로 들어오면 로그인 페이지로 보냅니다 */
 if (new URLSearchParams(location.search).get('verified') === '1') location.replace('/login/?verified=1');

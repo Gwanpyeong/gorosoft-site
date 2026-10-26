@@ -1,4 +1,4 @@
-import { firebaseConfig, SDK, VERIFY_URL, SIGNUP_URL } from '/firebase-config.js';
+import { firebaseConfig, SDK, VERIFY_URL, SIGNUP_URL } from '/firebase-config.js?v=20261026a';
 
 const configured = !!(firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId);
 const $ = (id) => document.getElementById(id);
