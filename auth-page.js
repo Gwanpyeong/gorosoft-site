@@ -1,4 +1,4 @@
-import { firebaseConfig, SDK, VERIFY_URL, SIGNUP_URL } from '/firebase-config.js?v=20261026a';
+import { firebaseConfig, SDK, VERIFY_URL, SIGNUP_URL } from '/firebase-config.js?v=20261026b';
 
 const configured = !!(firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId);
 const $ = (id) => document.getElementById(id);
@@ -88,6 +88,16 @@ async function saveMember(user, name, phone) {
   } catch (_) { return false; }
 }
 
+/* 가입 완료 여부: 가입하기를 마치면 members 문서가 생깁니다.
+   (이메일 링크로 만든 계정도 providerData에 'password'로 표시되므로 providerData로는 구분할 수 없습니다) */
+async function isRegistered(user) {
+  if (!fs) return false;
+  try {
+    const snap = await fs.m.getDoc(fs.m.doc(fs.db, 'members', user.uid));
+    return snap.exists();
+  } catch (_) { return false; }
+}
+
 /* 이미 로그인(인증 완료)한 상태로 들어오면 홈으로 보냅니다 */
 if (configured) {
   loadFirebase().then((a) => a.onAuthStateChanged(auth, (u) => { if (mode !== 'signup' && u && u.emailVerified && !submitting) location.replace('/'); })).catch(() => {});
@@ -153,7 +163,7 @@ async function completeLink(email) {
     const a = await loadFirebase();
     const cred = await a.signInWithEmailLink(auth, email, location.href);
     const u = cred.user;
-    if ((u.providerData || []).some((p) => p.providerId === 'password')) {
+    if (await isRegistered(u)) {
       await a.signOut(auth);
       resetToStepOne('이미 가입된 이메일입니다. 로그인하거나 비밀번호 찾기를 이용해 주세요.', 'bad');
       history.replaceState(null, '', location.pathname);
