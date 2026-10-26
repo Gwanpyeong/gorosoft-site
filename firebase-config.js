@@ -11,3 +11,5 @@ export const firebaseConfig = {
 export const SDK = "https://www.gstatic.com/firebasejs/10.14.1/";
 /* 인증 메일의 링크를 누른 뒤 돌아올 주소 (Firebase 승인된 도메인이어야 합니다) */
 export const VERIFY_URL = "https://gorosoft.co.kr/login/?verified=1";
+/* 가입 시 이메일 인증 링크를 누르면 돌아올 주소 */
+export const SIGNUP_URL = "https://gorosoft.co.kr/signup/";

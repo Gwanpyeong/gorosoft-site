@@ -1,4 +1,4 @@
-import { firebaseConfig, SDK, VERIFY_URL } from '/firebase-config.js';
+import { firebaseConfig, SDK, VERIFY_URL, SIGNUP_URL } from '/firebase-config.js';
 
 const configured = !!(firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId);
 const $ = (id) => document.getElementById(id);
@@ -8,6 +8,10 @@ const nameIn = $('aName'), emailIn = $('aEmail'), pw = $('aPw'), pw2 = $('aPw2')
 const agree = $('aAgree'), terms = $('aTerms'), allBox = $('aAll');
 const submitLabel = submitBtn.textContent;
 let fb = null, auth = null, fs = null, submitting = false;
+const sendBtn = $('sendLinkBtn'), rest = $('restBox'), vState = $('verifyState');
+const LS_KEY = 'gs_signup_email';
+const WINDOW_MS = window.__SIGNUP_WINDOW_MS || 5 * 60 * 1000; /* 인증 후 가입을 마쳐야 하는 시간 */
+let verifiedUser = null, linkPending = false, countdown = null, cooldown = null;
 
 function say(el, text, ok) { el.textContent = text || ''; el.classList.toggle('ok', !!ok); }
 const setMsg = (t, ok) => say(msg, t, ok);
@@ -86,7 +90,116 @@ async function saveMember(user, name, phone) {
 
 /* 이미 로그인(인증 완료)한 상태로 들어오면 홈으로 보냅니다 */
 if (configured) {
-  loadFirebase().then((a) => a.onAuthStateChanged(auth, (u) => { if (u && u.emailVerified && !submitting) location.replace('/'); })).catch(() => {});
+  loadFirebase().then((a) => a.onAuthStateChanged(auth, (u) => { if (mode !== 'signup' && u && u.emailVerified && !submitting) location.replace('/'); })).catch(() => {});
+}
+
+/* ── 회원가입: ① 이메일 인증 → ② 정보 입력 → ③ 가입하기 ── */
+const ls = {
+  get(k) { try { return localStorage.getItem(k); } catch (_) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (_) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (_) {} }
+};
+function setVState(text, kind) { vState.textContent = text || ''; vState.className = 'hint' + (kind ? ' ' + kind : ''); }
+const mmss = (ms) => { const t = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+
+function linkErr(err) {
+  switch (err && err.code) {
+    case 'auth/invalid-action-code':
+    case 'auth/expired-action-code': return '인증 링크가 만료되었거나 이미 사용되었습니다. 인증 메일을 다시 받아 주세요.';
+    case 'auth/invalid-email': return '메일을 받은 이메일 주소와 다릅니다. 인증 메일을 받은 주소를 정확히 입력해 주세요.';
+    case 'auth/operation-not-allowed': return '이메일 링크 인증이 아직 켜져 있지 않습니다. 관리자에게 문의해 주세요.';
+    default: return errText(err);
+  }
+}
+
+function resetToStepOne(message, kind) {
+  if (countdown) { clearInterval(countdown); countdown = null; }
+  verifiedUser = null; linkPending = false;
+  rest.disabled = true; emailIn.readOnly = false;
+  sendBtn.hidden = false; sendBtn.disabled = false; sendBtn.textContent = '인증 메일 보내기';
+  setVState(message, kind);
+}
+
+function startCooldown() {
+  let n = 30;
+  sendBtn.disabled = true;
+  const tick = () => {
+    if (n <= 0) { clearInterval(cooldown); sendBtn.disabled = false; sendBtn.textContent = '인증 메일 다시 보내기'; return; }
+    sendBtn.textContent = '다시 보내기 (' + n + '초)'; n -= 1;
+  };
+  tick(); cooldown = setInterval(tick, 1000);
+}
+
+async function sendLink() {
+  if (!configured) { setVState('회원 기능은 현재 준비 중입니다.', 'bad'); return; }
+  if (!emailIn.checkValidity() || !emailIn.value.trim()) { emailIn.reportValidity(); return; }
+  const email = emailIn.value.trim();
+  sendBtn.disabled = true;
+  try {
+    const a = await loadFirebase();
+    await a.sendSignInLinkToEmail(auth, email, { url: SIGNUP_URL, handleCodeInApp: true });
+    ls.set(LS_KEY, email);
+    setVState('인증 메일을 보냈습니다. 메일의 링크를 누르면 이 화면으로 돌아와 인증이 완료돼요. (스팸함도 확인해 주세요)', 'ok');
+    startCooldown();
+  } catch (err) {
+    sendBtn.disabled = false;
+    setVState(linkErr(err), 'bad');
+  }
+}
+
+async function completeLink(email) {
+  sendBtn.disabled = true;
+  try {
+    const a = await loadFirebase();
+    const cred = await a.signInWithEmailLink(auth, email, location.href);
+    const u = cred.user;
+    if ((u.providerData || []).some((p) => p.providerId === 'password')) {
+      await a.signOut(auth);
+      resetToStepOne('이미 가입된 이메일입니다. 로그인하거나 비밀번호 찾기를 이용해 주세요.', 'bad');
+      history.replaceState(null, '', location.pathname);
+      return;
+    }
+    verifiedUser = u; linkPending = false;
+    ls.del(LS_KEY);
+    history.replaceState(null, '', location.pathname);
+    emailIn.value = email; emailIn.readOnly = true;
+    sendBtn.hidden = true; rest.disabled = false;
+    const end = Date.now() + WINDOW_MS;
+    const paint = () => {
+      const left = end - Date.now();
+      if (left <= 0) {
+        a.signOut(auth).catch(() => {});
+        resetToStepOne('가입 가능 시간이 지났습니다. 인증 메일을 다시 받아 주세요.', 'bad');
+        return;
+      }
+      setVState('이메일 인증이 완료되었습니다 ✓ 남은 시간 ' + mmss(left) + ' 안에 정보를 입력하고 가입하기를 눌러 주세요.', 'ok');
+    };
+    paint(); countdown = setInterval(paint, 1000);
+  } catch (err) {
+    resetToStepOne(linkErr(err), 'bad');
+    history.replaceState(null, '', location.pathname);
+  }
+}
+
+if (mode === 'signup') {
+  sendBtn.addEventListener('click', () => {
+    if (linkPending) {
+      if (!emailIn.checkValidity() || !emailIn.value.trim()) { emailIn.reportValidity(); return; }
+      completeLink(emailIn.value.trim());
+    } else sendLink();
+  });
+  if (configured) {
+    loadFirebase().then((a) => {
+      if (a.isSignInWithEmailLink(auth, location.href)) {
+        const saved = ls.get(LS_KEY);
+        if (saved) completeLink(saved);
+        else {
+          linkPending = true; sendBtn.textContent = '인증 확인';
+          setVState('인증 메일을 받은 이메일을 한 번 더 입력하고 [인증 확인]을 눌러 주세요.');
+        }
+      }
+    }).catch(() => {});
+  }
 }
 
 /* 다른 화면에서 돌아왔을 때 안내 */
@@ -111,6 +224,7 @@ $('resendBtn').addEventListener('click', async () => {
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!configured) { setMsg('회원 기능은 현재 준비 중입니다.'); return; }
+  if (mode === 'signup' && !verifiedUser) { sendBtn.click(); return; }
   const email = emailIn.value.trim(), pass = pw ? pw.value : '';
   const name = nameIn ? nameIn.value.trim() : '', phone = phoneIn ? phoneIn.value.trim() : '';
   if (mode === 'signup') {
@@ -125,12 +239,11 @@ form.addEventListener('submit', async (e) => {
   try {
     const a = await loadFirebase();
     if (mode === 'signup') {
-      const cred = await a.createUserWithEmailAndPassword(auth, email, pass);
-      try { await a.updateProfile(cred.user, { displayName: name }); } catch (_) {}
-      await saveMember(cred.user, name, phone);
-      try { await a.sendEmailVerification(cred.user, { url: VERIFY_URL }); } catch (_) {}
-      await a.signOut(auth);
-      done = '인증 메일을 보냈습니다. 메일의 인증 링크를 누르면 가입이 완료되고, 그 뒤에 로그인할 수 있습니다. (스팸함도 확인해 주세요)';
+      await a.updatePassword(verifiedUser, pass);
+      try { await a.updateProfile(verifiedUser, { displayName: name }); } catch (_) {}
+      await saveMember(verifiedUser, name, phone);
+      location.href = '/';
+      return;
     } else if (mode === 'reset') {
       await a.sendPasswordResetEmail(auth, email);
       done = '비밀번호 재설정 링크를 메일로 보냈습니다. 링크에서 새 비밀번호를 정한 뒤 로그인하세요. 로그인 후에는 마이페이지에서 언제든 바꿀 수 있습니다.';
@@ -146,6 +259,11 @@ form.addEventListener('submit', async (e) => {
   } catch (err) {
     submitting = false;
     setBusy(false);
+    if (mode === 'signup' && err && err.code === 'auth/requires-recent-login') {
+      try { await fb.signOut(auth); } catch (_) {}
+      resetToStepOne('가입 가능 시간이 지났습니다. 인증 메일을 다시 받아 주세요.', 'bad');
+      return;
+    }
     setMsg(errText(err));
     return;
   }

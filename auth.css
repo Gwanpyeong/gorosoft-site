@@ -46,3 +46,9 @@ header.top .bar{max-width:1080px;margin:0 auto;padding:12px 20px;display:flex;al
 .btn.full{width:100%;padding:12px;margin-top:10px;font-size:15px;border-radius:8px}
 footer{border-top:1px solid var(--line);padding:22px 20px 40px;font:400 13px/1.9 var(--sans);color:var(--muted);text-align:center}
 footer a{color:var(--muted)}
+fieldset{border:0;padding:0;margin:0;min-width:0}
+fieldset[disabled]{opacity:.4}
+.steps{color:var(--muted);font-size:13px;margin:6px 0 0}
+.btn.full.sec{background:transparent;color:var(--text);border-color:var(--muted)}
+.btn.full.sec:disabled{opacity:.55}
+#verifyState{margin:10px 0 14px;font-size:14px;line-height:1.6}

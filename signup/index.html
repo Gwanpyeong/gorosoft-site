@@ -22,25 +22,31 @@
 </div></header>
 <main class="authwrap"><div class="authcard">
   <h1>회원가입</h1>
-  
+  <p class="steps">① 이메일 인증 → ② 정보 입력 → ③ 가입하기 순서로 진행해요.</p>
   <form id="authForm">
     <div class="tbl">
-      <div class="f"><label for="aName">이름<i>*</i></label><input id="aName" type="text" maxlength="20" autocomplete="name" required></div>
       <div class="f"><label for="aEmail">이메일<i>*</i></label><input id="aEmail" type="email" autocomplete="email" required></div>
-      <div class="f"><label for="aPw">비밀번호<i>*</i></label><input id="aPw" type="password" minlength="8" autocomplete="new-password" required></div>
-      <div class="f"><label for="aPw2">비밀번호 확인<i>*</i></label><input id="aPw2" type="password" minlength="8" autocomplete="new-password" required></div>
-      <div class="f"><label for="aPhone">휴대전화</label><input id="aPhone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="13" placeholder="선택 입력"></div>
     </div>
-    <p class="hint" id="pwMatch" role="status" aria-live="polite"></p>
-    <p class="note">가입한 이메일이 로그인 아이디로 사용됩니다. 비밀번호는 8자 이상이에요. 휴대전화는 선택이며, 입력하면 문의 응대·안내 연락에 사용합니다.</p>
+    <button type="button" class="btn full sec" id="sendLinkBtn">인증 메일 보내기</button>
+    <p class="hint" id="verifyState" role="status" aria-live="polite"></p>
+    <fieldset id="restBox" disabled>
+      <div class="tbl">
+        <div class="f"><label for="aName">이름<i>*</i></label><input id="aName" type="text" maxlength="20" autocomplete="name" required></div>
+        <div class="f"><label for="aPw">비밀번호<i>*</i></label><input id="aPw" type="password" minlength="8" autocomplete="new-password" required></div>
+        <div class="f"><label for="aPw2">비밀번호 확인<i>*</i></label><input id="aPw2" type="password" minlength="8" autocomplete="new-password" required></div>
+        <div class="f"><label for="aPhone">휴대전화</label><input id="aPhone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="13" placeholder="선택 입력"></div>
+      </div>
+      <p class="hint" id="pwMatch" role="status" aria-live="polite"></p>
+      <p class="note">인증한 이메일이 로그인 아이디로 사용됩니다. 비밀번호는 8자 이상이에요. 휴대전화는 선택이며, 입력하면 문의 응대·안내 연락에 사용합니다.</p>
       <div class="agrees">
         <label class="agree all"><input type="checkbox" id="aAll"><span><b>전체 동의</b></span></label>
         <label class="agree"><input type="checkbox" id="aTerms" required><span>[필수] <a href="/terms/" target="_blank" rel="noopener">이용약관</a>에 동의합니다.</span></label>
         <label class="agree"><input type="checkbox" id="aAgree" required><span>[필수] 개인정보 수집·이용 및 국외 이전(Google Firebase)에 동의합니다. (<a href="/privacy/" target="_blank" rel="noopener">개인정보처리방침</a>)</span></label>
       </div>
-    <p class="msg" id="authMsg" role="status" aria-live="polite"></p>
+      <p class="msg" id="authMsg" role="status" aria-live="polite"></p>
+      <button type="submit" class="btn pri full" id="authSubmit">가입하기</button>
+    </fieldset>
     <p class="alt" id="resendBox" hidden><button type="button" class="sw" id="resendBtn">인증 메일 다시 보내기</button></p>
-    <button type="submit" class="btn pri full" id="authSubmit">인증 메일 받고 가입하기</button>
     <p class="alt" id="authAlt">이미 계정이 있나요? <a href="/login/">로그인</a></p>
   </form>
 </div></main>
