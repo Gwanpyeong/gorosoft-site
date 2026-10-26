@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>비밀번호 찾기 | 고로소프트 GOROSOFT</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://gorosoft.co.kr/reset/">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#121316">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;800&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/auth.css">
+</head>
+<body data-mode="reset">
+<header class="top"><div class="bar">
+  <a class="brand" href="/" aria-label="고로소프트 홈으로"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="11.5" fill="#121316"/><path d="M32.72 42.58C41.98 42.58 48.63 36.8 48.63 27.15V22.39H33.13V28.68H40.36C40.26 32.61 37.57 35.06 32.79 35.06C27.33 35.06 24.13 31.01 24.13 23.97C24.13 16.98 27.5 12.98 32.76 12.98C36.33 12.98 38.76 14.75 39.58 17.74H48.24C47.35 10.53 40.92 5.46 32.62 5.46C22.99 5.46 15.37 12.28 15.37 24.09C15.37 35.52 22.38 42.58 32.72 42.58Z" fill="#ffffff"/><rect x="15.37" y="50.75" width="33.26" height="7.80" fill="#b5e04b"/></svg><b>GOROSOFT</b></a>
+  <a class="back" href="/">← 홈으로</a>
+</div></header>
+<main class="authwrap"><div class="authcard">
+  <h1>비밀번호 찾기</h1>
+  <p class="desc">가입한 이메일을 입력하면 비밀번호 재설정 링크를 보내 드려요.</p>
+  <form id="authForm">
+    <div class="tbl">
+      <div class="f"><label for="aEmail">이메일<i>*</i></label><input id="aEmail" type="email" autocomplete="email" required></div>
+    </div>
+    <p class="hint" id="pwMatch" hidden></p>
+    
+    <p class="msg" id="authMsg" role="status" aria-live="polite"></p>
+    <p class="alt" id="resendBox" hidden><button type="button" class="sw" id="resendBtn">인증 메일 다시 보내기</button></p>
+    <button type="submit" class="btn pri full" id="authSubmit">재설정 링크 메일 받기</button>
+    <p class="alt" id="authAlt"><a href="/login/">로그인으로 돌아가기</a></p>
+  </form>
+</div></main>
+<footer>상호 고로소프트 · 대표자 노승현 · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a><br>© 2026 GOROSOFT. All rights reserved.</footer>
+<script type="module" src="/auth-page.js"></script>
+</body>
+</html>
