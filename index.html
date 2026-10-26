@@ -149,6 +149,25 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
 .dlg .sep{border-top:1px solid var(--line);margin:22px 0 2px}
 .dlg .alt{word-break:break-all}
 .sw{background:none;border:0;color:var(--accent);cursor:pointer;font:inherit;text-decoration:underline;padding:0}
+/* 출시 안내 팝업 */
+.pop{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(5,8,16,.72);animation:popFade .25s ease}
+.pop-box:focus{outline:none}
+.pop-box{width:min(100%,380px);background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5);animation:popUp .3s ease}
+.pop-body{padding:34px 28px 30px;position:relative}
+.pop-body::before{content:"";position:absolute;top:0;left:28px;width:56px;height:6px;background:var(--accent)}
+.pop-body .badge{margin-bottom:18px}
+.pop-body h2{font:800 clamp(28px,7vw,36px)/1.25 var(--sans);letter-spacing:-.02em;margin:0 0 12px}
+.pop-body h2 em{font-style:normal;color:var(--accent)}
+.pop-body p{color:var(--muted);font-size:15px;margin:0 0 24px}
+.pop-body .btn.big{width:100%;text-align:center}
+.pop-foot{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
+.pop-foot button{background:transparent;border:0;color:var(--muted);font:500 14px var(--sans);padding:14px 10px;cursor:pointer}
+.pop-foot button+button{border-left:1px solid var(--line);color:var(--text)}
+.pop-foot button:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.pop-foot button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+@keyframes popFade{from{opacity:0}to{opacity:1}}
+@keyframes popUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.pop,.pop-box{animation:none}}
 </style>
 </head>
 <body>
@@ -260,6 +279,36 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
     </form>
   </div>
 </dialog>
+<div class="pop" id="launchPop" role="dialog" aria-modal="true" aria-labelledby="popTitle" hidden>
+  <div class="pop-box" tabindex="-1" id="popBox">
+    <div class="pop-body">
+      <span class="badge">NOTICE</span>
+      <h2 id="popTitle"><em>12월</em> 정식 출시!</h2>
+      <p>고로소프트의 첫 앱이 12월에 App Store와 Google Play에 출시됩니다. 출시 소식은 이 페이지에서 가장 먼저 안내해 드릴게요.</p>
+      <a class="btn pri big" href="#apps" id="popGo">앱 소식 보기</a>
+    </div>
+    <div class="pop-foot">
+      <button type="button" id="popToday">오늘 하루 보지 않기</button>
+      <button type="button" id="popClose">닫기</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var KEY='gorosoft_pop_hide', pop=document.getElementById('launchPop');
+  function today(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+  try{ if(localStorage.getItem(KEY)===today()) return; }catch(e){}
+  function close(){ pop.hidden=true; document.removeEventListener('keydown',onKey); }
+  function onKey(e){ if(e.key==='Escape') close(); }
+  document.getElementById('popClose').onclick=close;
+  document.getElementById('popGo').onclick=close;
+  document.getElementById('popToday').onclick=function(){ try{localStorage.setItem(KEY,today());}catch(e){} close(); };
+  pop.onclick=function(e){ if(e.target===pop) close(); };
+  pop.hidden=false;
+  document.addEventListener('keydown',onKey);
+  document.getElementById("popBox").focus();
+})();
+</script>
 <script type="module">
 import { firebaseConfig, SDK } from '/firebase-config.js?v=20261026b';
 
