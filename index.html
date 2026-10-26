@@ -173,7 +173,7 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
 <body>
 <header class="top" id="top">
   <div class="bar">
-    <a class="brand" href="#top" aria-label="고로소프트 GOROSOFT 처음으로"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="11.5" fill="#121316"/><path d="M32.72 42.58C41.98 42.58 48.63 36.8 48.63 27.15V22.39H33.13V28.68H40.36C40.26 32.61 37.57 35.06 32.79 35.06C27.33 35.06 24.13 31.01 24.13 23.97C24.13 16.98 27.5 12.98 32.76 12.98C36.33 12.98 38.76 14.75 39.58 17.74H48.24C47.35 10.53 40.92 5.46 32.62 5.46C22.99 5.46 15.37 12.28 15.37 24.09C15.37 35.52 22.38 42.58 32.72 42.58Z" fill="#ffffff"/><rect x="15.37" y="50.75" width="33.26" height="7.80" fill="#b5e04b"/></svg><b>GOROSOFT</b></a>
+    <a class="brand" href="/" id="brandHome" aria-label="고로소프트 GOROSOFT 처음으로"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="11.5" fill="#121316"/><path d="M32.72 42.58C41.98 42.58 48.63 36.8 48.63 27.15V22.39H33.13V28.68H40.36C40.26 32.61 37.57 35.06 32.79 35.06C27.33 35.06 24.13 31.01 24.13 23.97C24.13 16.98 27.5 12.98 32.76 12.98C36.33 12.98 38.76 14.75 39.58 17.74H48.24C47.35 10.53 40.92 5.46 32.62 5.46C22.99 5.46 15.37 12.28 15.37 24.09C15.37 35.52 22.38 42.58 32.72 42.58Z" fill="#ffffff"/><rect x="15.37" y="50.75" width="33.26" height="7.80" fill="#b5e04b"/></svg><b>GOROSOFT</b></a>
     <nav class="main" aria-label="주 메뉴"><a href="#about">소개</a><a href="#services">서비스</a><a href="#apps">앱</a><a href="#news">소식</a><a href="#contact">문의</a></nav>
     <div class="right">
       <div class="auth" id="authBar"><a class="btn" href="/login/">로그인</a><a class="btn pri" href="/signup/">회원가입</a></div>
@@ -422,6 +422,13 @@ $('delForm').addEventListener('submit', async (e) => {
     return;
   } catch (err) { say($('delMsg'), errText(err)); }
   btn.disabled = false;
+});
+</script>
+<script>
+document.getElementById('brandHome').addEventListener('click',function(e){
+  e.preventDefault();
+  if(location.hash) history.replaceState(null,'',location.pathname+location.search);
+  window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
 });
 </script>
 </body>
