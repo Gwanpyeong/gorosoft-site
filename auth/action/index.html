@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>비밀번호 재설정 | 고로소프트 GOROSOFT</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#121316">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;800&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/auth.css?v=20261026b">
+</head>
+<body>
+<header class="top"><div class="bar">
+  <a class="brand" href="/" aria-label="고로소프트 홈으로"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="11.5" fill="#121316"/><path d="M32.72 42.58C41.98 42.58 48.63 36.8 48.63 27.15V22.39H33.13V28.68H40.36C40.26 32.61 37.57 35.06 32.79 35.06C27.33 35.06 24.13 31.01 24.13 23.97C24.13 16.98 27.5 12.98 32.76 12.98C36.33 12.98 38.76 14.75 39.58 17.74H48.24C47.35 10.53 40.92 5.46 32.62 5.46C22.99 5.46 15.37 12.28 15.37 24.09C15.37 35.52 22.38 42.58 32.72 42.58Z" fill="#ffffff"/><rect x="15.37" y="50.75" width="33.26" height="7.80" fill="#b5e04b"/></svg><b>GOROSOFT</b></a>
+  <a class="back" href="/">← 홈으로</a>
+</div></header>
+<main class="authwrap"><div class="authcard">
+  <h1 id="rTitle">비밀번호 재설정</h1>
+  <p class="desc" id="rDesc">링크를 확인하고 있어요…</p>
+  <form id="rForm" hidden>
+    <input id="rUser" type="email" autocomplete="username" hidden>
+    <div class="tbl">
+      <div class="f"><label for="rPw">새 비밀번호<i>*</i></label><input id="rPw" type="password" minlength="8" autocomplete="new-password" required></div>
+      <div class="f"><label for="rPw2">비밀번호 확인<i>*</i></label><input id="rPw2" type="password" minlength="8" autocomplete="new-password" required></div>
+    </div>
+    <p class="hint" id="rMatch" role="status" aria-live="polite"></p>
+    <p class="msg" id="rMsg" role="status" aria-live="polite"></p>
+    <button type="submit" class="btn pri full" id="rSubmit">비밀번호 변경</button>
+  </form>
+  <p class="alt" id="rDone" hidden><a class="btn pri full" href="/login/">로그인하기</a></p>
+  <p class="alt" id="rAgain" hidden><a href="/reset/">재설정 메일 다시 받기</a></p>
+</div></main>
+<footer>상호 고로소프트 · 대표자 노승현 · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a><br>© 2026 GOROSOFT. All rights reserved.</footer>
+<script type="module">
+import { firebaseConfig, SDK } from '/firebase-config.js?v=20261026b';
+
+/* Firebase 메일 링크가 도착하는 곳입니다.
+   비밀번호 재설정(resetPassword)만 이 페이지에서 처리하고,
+   나머지(이메일 인증, 가입용 이메일 링크 등)는 Firebase 기본 처리 페이지로 그대로 넘깁니다. */
+const q = new URLSearchParams(location.search);
+const mode = q.get('mode'), code = q.get('oobCode');
+const $ = (id) => document.getElementById(id);
+
+if (mode !== 'resetPassword') {
+  location.replace('https://' + firebaseConfig.authDomain + '/__/auth/action' + location.search);
+} else {
+  run();
+}
+
+function errText(err) {
+  switch (err && err.code) {
+    case 'auth/expired-action-code':
+    case 'auth/invalid-action-code': return '링크가 만료되었거나 이미 사용되었습니다. 재설정 메일을 다시 받아 주세요.';
+    case 'auth/user-disabled':
+    case 'auth/user-not-found': return '해당 계정을 찾을 수 없습니다.';
+    case 'auth/weak-password': return '비밀번호가 너무 쉽습니다. 8자 이상으로 더 복잡하게 만들어 주세요.';
+    case 'auth/too-many-requests': return '시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.';
+    case 'auth/network-request-failed': return '네트워크 연결을 확인해 주세요.';
+    default: return '처리 중 문제가 생겼습니다. 잠시 후 다시 시도해 주세요.';
+  }
+}
+
+function fail(text) {
+  $('rTitle').textContent = '링크를 사용할 수 없어요';
+  $('rDesc').textContent = text;
+  $('rForm').hidden = true;
+  $('rAgain').hidden = false;
+}
+
+async function run() {
+  if (!code) { fail('재설정 링크가 올바르지 않습니다. 재설정 메일을 다시 받아 주세요.'); return; }
+  let a, auth;
+  try {
+    const [appMod, authMod] = await Promise.all([import(SDK + 'firebase-app.js'), import(SDK + 'firebase-auth.js')]);
+    auth = authMod.getAuth(appMod.initializeApp(firebaseConfig));
+    auth.languageCode = 'ko';
+    a = authMod;
+  } catch (_) { fail('네트워크 연결을 확인한 뒤 링크를 다시 열어 주세요.'); return; }
+
+  let email;
+  try { email = await a.verifyPasswordResetCode(auth, code); }
+  catch (err) { fail(errText(err)); return; }
+
+  $('rDesc').textContent = email + ' 계정의 새 비밀번호를 입력해 주세요.';
+  $('rUser').value = email;
+  $('rForm').hidden = false;
+  $('rPw').focus();
+
+  const pw = $('rPw'), pw2 = $('rPw2'), hint = $('rMatch'), msg = $('rMsg'), btn = $('rSubmit');
+  const say = (t, ok) => { msg.textContent = t || ''; msg.classList.toggle('ok', !!ok); };
+  function check() {
+    if (!pw2.value) { hint.textContent = ''; hint.className = 'hint'; return; }
+    const same = pw.value === pw2.value;
+    hint.textContent = same ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.';
+    hint.className = 'hint ' + (same ? 'ok' : 'bad');
+  }
+  pw.addEventListener('input', check);
+  pw2.addEventListener('input', check);
+
+  $('rForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (pw.value.length < 8) { say('비밀번호는 8자 이상으로 입력해 주세요.'); return; }
+    if (pw.value !== pw2.value) { say('비밀번호가 서로 다릅니다.'); pw2.focus(); return; }
+    btn.disabled = true; say('');
+    try {
+      await a.confirmPasswordReset(auth, code, pw.value);
+      $('rTitle').textContent = '비밀번호 변경 완료';
+      $('rDesc').textContent = '이제 새 비밀번호로 로그인할 수 있어요.';
+      $('rForm').hidden = true;
+      $('rDone').hidden = false;
+    } catch (err) {
+      if (err && (err.code === 'auth/expired-action-code' || err.code === 'auth/invalid-action-code')) { fail(errText(err)); return; }
+      say(errText(err));
+      btn.disabled = false;
+    }
+  });
+}
+</script>
+</body>
+</html>
