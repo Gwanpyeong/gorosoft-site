@@ -100,7 +100,9 @@ async function isRegistered(user) {
 
 /* 이미 로그인(인증 완료)한 상태로 들어오면 홈으로 보냅니다 */
 if (configured) {
-  loadFirebase().then((a) => a.onAuthStateChanged(auth, (u) => { if (mode !== 'signup' && u && u.emailVerified && !submitting) location.replace('/'); })).catch(() => {});
+  loadFirebase().then((a) => a.onAuthStateChanged(auth, async (u) => {
+    if (mode !== 'signup' && u && u.emailVerified && !submitting) location.replace((await isRegistered(u)) ? '/' : '/signup/');
+  })).catch(() => {});
 }
 
 /* ── 회원가입: ① 이메일 인증 → ② 정보 입력 → ③ 가입하기 ── */
@@ -118,6 +120,7 @@ function linkErr(err) {
     case 'auth/expired-action-code': return '인증 링크가 만료되었거나 이미 사용되었습니다. 인증 메일을 다시 받아 주세요.';
     case 'auth/invalid-email': return '메일을 받은 이메일 주소와 다릅니다. 인증 메일을 받은 주소를 정확히 입력해 주세요.';
     case 'auth/operation-not-allowed': return '이메일 링크 인증이 아직 켜져 있지 않습니다. 관리자에게 문의해 주세요.';
+    case 'auth/quota-exceeded': return '오늘 보낼 수 있는 인증 메일이 모두 소진되었습니다. 내일 다시 시도하시거나 문의하기로 연락해 주세요.';
     default: return errText(err);
   }
 }
@@ -261,7 +264,8 @@ form.addEventListener('submit', async (e) => {
     } else {
       const cred = await a.signInWithEmailAndPassword(auth, email, pass);
       if (cred.user.emailVerified) {
-        location.href = '/';
+        /* 이름 입력(가입 3단계)을 마치지 않은 계정은 가입 화면으로 이어서 보냅니다 */
+        location.href = (await isRegistered(cred.user)) ? '/' : '/signup/';
         return;
       }
       done = '이메일 인증이 아직 되지 않았습니다. 받은 메일의 인증 링크를 누른 뒤 다시 로그인해 주세요.';

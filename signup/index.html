@@ -14,43 +14,88 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;800&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/auth.css?v=20261026b">
+<style>
+.stepbar{display:flex;gap:6px;margin:16px 0 4px;padding:0;list-style:none}
+.stepbar li{flex:1;text-align:center;font:500 12.5px/1.3 var(--sans);color:var(--muted);padding:9px 4px 8px;border-top:3px solid var(--line)}
+.stepbar li b{display:block;font:600 12px var(--mono);margin-bottom:2px}
+.stepbar li.on{color:var(--text);border-top-color:var(--accent)}
+.stepbar li.on b{color:var(--accent)}
+.stepbar li.done{color:var(--muted);border-top-color:#5e7029}
+.mailbox{margin-top:18px;border:1px solid var(--line);border-radius:10px;padding:18px 16px;background:#17191d}
+.mailbox p{margin:0;font-size:14.5px;line-height:1.75}
+.mailbox b{color:var(--text);word-break:break-all}
+.row2{display:flex;gap:8px}
+.row2 .btn{flex:1}
+.notice{margin:14px 0 0;padding:12px 14px;border-radius:8px;background:#1f2a12;color:#dbe9b8;font-size:14px;line-height:1.65}
+.f input[readonly]{color:var(--muted)}
+.sw.dim{color:var(--muted);font-size:13px}
+</style>
 </head>
-<body data-mode="signup">
+<body>
 <header class="top"><div class="bar">
   <a class="brand" href="/" aria-label="고로소프트 홈으로"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="11.5" fill="#121316"/><path d="M32.72 42.58C41.98 42.58 48.63 36.8 48.63 27.15V22.39H33.13V28.68H40.36C40.26 32.61 37.57 35.06 32.79 35.06C27.33 35.06 24.13 31.01 24.13 23.97C24.13 16.98 27.5 12.98 32.76 12.98C36.33 12.98 38.76 14.75 39.58 17.74H48.24C47.35 10.53 40.92 5.46 32.62 5.46C22.99 5.46 15.37 12.28 15.37 24.09C15.37 35.52 22.38 42.58 32.72 42.58Z" fill="#ffffff"/><rect x="15.37" y="50.75" width="33.26" height="7.80" fill="#b5e04b"/></svg><b>GOROSOFT</b></a>
   <a class="back" href="/">← 홈으로</a>
 </div></header>
 <main class="authwrap"><div class="authcard">
   <h1>회원가입</h1>
-  <p class="steps">① 이메일 인증 → ② 정보 입력 → ③ 가입하기 순서로 진행해요.</p>
-  <form id="authForm">
+  <ol class="stepbar" aria-label="가입 단계">
+    <li id="sb1"><b>01</b>계정 만들기</li>
+    <li id="sb2"><b>02</b>이메일 인증</li>
+    <li id="sb3"><b>03</b>정보 입력</li>
+  </ol>
+  <p class="desc" id="loading">잠시만 기다려 주세요…</p>
+  <p class="notice" id="topNotice" hidden></p>
+
+  <!-- 1단계: 이메일·비밀번호·약관 동의 → 계정 만들고 인증 메일 받기 -->
+  <form id="step1" hidden>
     <div class="tbl">
-      <div class="f"><label for="aEmail">이메일<i>*</i></label><input id="aEmail" type="email" autocomplete="email" required></div>
+      <div class="f"><label for="aEmail">이메일<i>*</i></label><input id="aEmail" type="email" autocomplete="username" required></div>
+      <div class="f"><label for="aPw">비밀번호<i>*</i></label><input id="aPw" type="password" minlength="8" autocomplete="new-password" required></div>
+      <div class="f"><label for="aPw2">비밀번호 확인<i>*</i></label><input id="aPw2" type="password" minlength="8" autocomplete="new-password" required></div>
     </div>
-    <button type="button" class="btn full sec" id="sendLinkBtn">인증 메일 보내기</button>
-    <p class="hint" id="verifyState" role="status" aria-live="polite"></p>
-    <fieldset id="restBox" disabled>
-      <div class="tbl">
-        <div class="f"><label for="aName">이름<i>*</i></label><input id="aName" type="text" maxlength="20" autocomplete="name" required></div>
-        <div class="f"><label for="aPw">비밀번호<i>*</i></label><input id="aPw" type="password" minlength="8" autocomplete="new-password" required></div>
-        <div class="f"><label for="aPw2">비밀번호 확인<i>*</i></label><input id="aPw2" type="password" minlength="8" autocomplete="new-password" required></div>
-        <div class="f"><label for="aPhone">휴대전화</label><input id="aPhone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="13" placeholder="선택 입력"></div>
-      </div>
-      <p class="hint" id="pwMatch" role="status" aria-live="polite"></p>
-      <p class="note">인증한 이메일이 로그인 아이디로 사용됩니다. 비밀번호는 8자 이상이에요. 휴대전화는 선택이며, 입력하면 문의 응대·안내 연락에 사용합니다.</p>
-      <div class="agrees">
-        <label class="agree all"><input type="checkbox" id="aAll"><span><b>전체 동의</b></span></label>
-        <label class="agree"><input type="checkbox" id="aTerms" required><span>[필수] <a href="/terms/" target="_blank" rel="noopener">이용약관</a>에 동의합니다.</span></label>
-        <label class="agree"><input type="checkbox" id="aAgree" required><span>[필수] 개인정보 수집·이용 및 국외 이전(Google Firebase)에 동의합니다. (<a href="/privacy/" target="_blank" rel="noopener">개인정보처리방침</a>)</span></label>
-      </div>
-      <p class="msg" id="authMsg" role="status" aria-live="polite"></p>
-      <button type="submit" class="btn pri full" id="authSubmit">가입하기</button>
-    </fieldset>
-    <p class="alt" id="resendBox" hidden><button type="button" class="sw" id="resendBtn">인증 메일 다시 보내기</button></p>
-    <p class="alt" id="authAlt">이미 계정이 있나요? <a href="/login/">로그인</a></p>
+    <p class="hint" id="pwMatch" role="status" aria-live="polite"></p>
+    <p class="note">입력한 이메일이 로그인 아이디가 됩니다. 비밀번호는 8자 이상이에요.</p>
+    <div class="agrees">
+      <label class="agree all"><input type="checkbox" id="aAll"><span><b>전체 동의</b></span></label>
+      <label class="agree"><input type="checkbox" id="aTerms" required><span>[필수] <a href="/terms/" target="_blank" rel="noopener">이용약관</a>에 동의합니다.</span></label>
+      <label class="agree"><input type="checkbox" id="aAgree" required><span>[필수] 개인정보 수집·이용 및 국외 이전(Google Firebase)에 동의합니다. (<a href="/privacy/" target="_blank" rel="noopener">개인정보처리방침</a>)</span></label>
+    </div>
+    <p class="msg" id="msg1" role="status" aria-live="polite"></p>
+    <button type="submit" class="btn pri full" id="btn1">인증 메일 받기</button>
+    <p class="alt">이미 계정이 있나요? <a href="/login/">로그인</a></p>
   </form>
+
+  <!-- 2단계: 메일의 인증 링크 누르기 -->
+  <div id="step2" hidden>
+    <div class="mailbox">
+      <p><b id="sentTo"></b> 으로 인증 메일을 보냈어요.<br>메일의 <b>인증 링크</b>를 누른 뒤, 아래 버튼을 눌러 주세요.</p>
+      <p class="note">메일이 안 보이면 스팸함도 확인해 주세요.</p>
+    </div>
+    <p class="msg" id="msg2" role="status" aria-live="polite"></p>
+    <button type="button" class="btn pri full" id="btnCheck">인증 완료했어요</button>
+    <div class="row2"><button type="button" class="btn full sec" id="btnResend">인증 메일 다시 보내기</button></div>
+    <p class="alt"><button type="button" class="sw dim" id="btnOther">다른 이메일로 가입하기</button></p>
+  </div>
+
+  <!-- 3단계: 이름·휴대전화 입력 → 가입 완료 -->
+  <form id="step3" hidden>
+    <div class="tbl">
+      <div class="f"><label for="vEmail">이메일</label><input id="vEmail" type="email" readonly></div>
+      <div class="f"><label for="aName">이름<i>*</i></label><input id="aName" type="text" maxlength="20" autocomplete="name" required></div>
+      <div class="f"><label for="aPhone">휴대전화</label><input id="aPhone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="13" placeholder="선택 입력"></div>
+    </div>
+    <p class="note">이름은 가입 후 변경할 수 없어요. 휴대전화는 선택이며, 입력하면 문의 응대·안내 연락에 사용합니다.</p>
+    <p class="msg" id="msg3" role="status" aria-live="polite"></p>
+    <button type="submit" class="btn pri full" id="btn3">가입 완료</button>
+  </form>
+
+  <!-- 완료 -->
+  <div id="stepDone" hidden>
+    <div class="mailbox"><p><b id="doneName"></b>님, 가입이 완료되었어요 🎉<br>이제 고로소프트의 소식과 서비스를 이용할 수 있어요.</p></div>
+    <a class="btn pri full" href="/" style="display:block;text-align:center;text-decoration:none">홈으로</a>
+  </div>
 </div></main>
 <footer>상호 고로소프트 · 대표자 노승현 · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a><br>© 2026 GOROSOFT. All rights reserved.</footer>
-<script type="module" src="/auth-page.js?v=20261028a"></script>
+<script type="module" src="/signup.js?v=20261028a"></script>
 </body>
 </html>
