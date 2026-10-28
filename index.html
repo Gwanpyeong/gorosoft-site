@@ -170,20 +170,31 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
 @media (prefers-reduced-motion:reduce){.pop,.pop-box{animation:none}}
 /* 스크롤 진행 바 */
 .progress{position:absolute;left:0;bottom:-1px;width:100%;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:0 50%;pointer-events:none}
-/* 떠 있는 문의하기 버튼 */
+/* 떠 있는 문의하기 버튼 + 안내봇 */
 .ask{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .ask-btn{display:flex;align-items:center;gap:8px;background:var(--accent);color:#121316;border:0;border-radius:999px;padding:13px 20px;font:700 15px var(--sans);cursor:pointer;box-shadow:0 10px 28px rgba(0,0,0,.45);transition:transform .2s}
 .ask-btn:hover{transform:translateY(-2px)}
 .ask-btn svg{width:18px;height:18px}
-.ask-btn:focus-visible,.ask-menu a:focus-visible{outline:2px solid var(--text);outline-offset:3px}
-.ask-menu{width:230px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:0 16px 40px rgba(0,0,0,.5);animation:popUp .2s ease}
-.ask-menu p{margin:6px 10px 8px;font:600 12px var(--sans);letter-spacing:.14em;color:var(--accent)}
-.ask-menu a{display:flex;flex-direction:column;padding:10px 12px;border-radius:8px;color:var(--text);text-decoration:none}
-.ask-menu a:hover{background:rgba(255,255,255,.05)}
-.ask-menu b{font:600 15px var(--sans)}
-.ask-menu span{font:400 13px var(--sans);color:var(--muted)}
+.ask-btn:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+.bot{width:min(360px,calc(100vw - 32px));max-height:min(560px,calc(100vh - 140px));display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 16px 40px rgba(0,0,0,.5);overflow:hidden;animation:popUp .2s ease}
+.bot[hidden]{display:none}
+.bot-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.bot-head svg{width:28px;height:28px;flex:none}
+.bot-head b{display:block;font:700 15px/1.3 var(--sans)}
+.bot-head span{font:400 12px var(--sans);color:var(--muted)}
+.bot-log{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
+.msg-b,.msg-u{max-width:88%;padding:10px 13px;border-radius:14px;font:400 14px/1.65 var(--sans);word-break:keep-all;overflow-wrap:anywhere}
+.msg-b{align-self:flex-start;background:#23262c;border-top-left-radius:4px}
+.msg-u{align-self:flex-end;background:var(--accent);color:#121316;font-weight:600;border-top-right-radius:4px}
+.msg-b a{color:var(--accent)}
+.msg-b.typing{color:var(--muted);letter-spacing:.2em}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start;max-width:100%}
+.chips button,.chips a{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:999px;padding:7px 12px;font:500 13px var(--sans);cursor:pointer;text-decoration:none}
+.chips button:hover,.chips a:hover{border-color:var(--accent);color:var(--accent)}
+.chips a.pri{background:var(--accent);border-color:var(--accent);color:#121316}
+.chips button:focus-visible,.chips a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (max-width:560px){.ask{right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px))}.ask-btn{padding:12px 18px}}
-@media (prefers-reduced-motion:reduce){.ask-btn{transition:none}.ask-btn:hover{transform:none}.ask-menu{animation:none}}
+@media (prefers-reduced-motion:reduce){.ask-btn{transition:none}.ask-btn:hover{transform:none}.bot{animation:none}}
 </style>
 </head>
 <body>
@@ -461,20 +472,78 @@ document.getElementById('brandHome').addEventListener('click',function(e){
 })();
 </script>
 <div class="ask" id="ask">
-  <div class="ask-menu" id="askMenu" hidden>
-    <p>CONTACT</p>
-    <a href="mailto:cube5828@gorosoft.co.kr?subject=%5B%EA%B3%A0%EB%A1%9C%EC%86%8C%ED%94%84%ED%8A%B8%5D%20%EB%AC%B8%EC%9D%98%EB%93%9C%EB%A6%BD%EB%8B%88%EB%8B%A4"><b>이메일 문의</b><span>cube5828@gorosoft.co.kr</span></a>
-    <a href="tel:+821094398428"><b>전화 문의</b><span>010-9439-8428</span></a>
+  <div class="bot" id="askMenu" role="dialog" aria-label="고로소프트 안내" hidden>
+    <div class="bot-head"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="11.5" fill="#121316"/><path d="M32.72 42.58C41.98 42.58 48.63 36.8 48.63 27.15V22.39H33.13V28.68H40.36C40.26 32.61 37.57 35.06 32.79 35.06C27.33 35.06 24.13 31.01 24.13 23.97C24.13 16.98 27.5 12.98 32.76 12.98C36.33 12.98 38.76 14.75 39.58 17.74H48.24C47.35 10.53 40.92 5.46 32.62 5.46C22.99 5.46 15.37 12.28 15.37 24.09C15.37 35.52 22.38 42.58 32.72 42.58Z" fill="#ffffff"/><rect x="15.37" y="50.75" width="33.26" height="7.80" fill="#b5e04b"/></svg><div><b>고로소프트 안내</b><span>자주 묻는 질문에 바로 답해 드려요</span></div></div>
+    <div class="bot-log" id="botLog" aria-live="polite"></div>
   </div>
   <button type="button" class="ask-btn" id="askBtn" aria-expanded="false" aria-controls="askMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span id="askLabel">문의하기</span></button>
 </div>
 <script>
 (function(){
-  var btn=document.getElementById('askBtn'), menu=document.getElementById('askMenu'), label=document.getElementById('askLabel');
-  function set(open){ menu.hidden=!open; btn.setAttribute('aria-expanded',open); label.textContent=open?'닫기':'문의하기'; }
-  btn.addEventListener('click',function(e){ e.stopPropagation(); set(menu.hidden); });
-  document.addEventListener('click',function(e){ if(!menu.hidden && !document.getElementById('ask').contains(e.target)) set(false); });
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape' && !menu.hidden){ set(false); btn.focus(); } });
+  var MAIL='cube5828@gorosoft.co.kr', TEL='+821094398428', TEL_TXT='010-9439-8428';
+  function mailto(subject, body){ return 'mailto:'+MAIL+'?subject='+encodeURIComponent(subject)+(body?'&body='+encodeURIComponent(body):''); }
+  var CONTACT=[{t:'이메일 문의',href:mailto('[고로소프트] 문의드립니다'),pri:true},{t:'전화 '+TEL_TXT,href:'tel:'+TEL}];
+  var TOPICS={
+    dev:{q:'외주·협업 개발 문의',
+      a:'앱 기획부터 iOS·안드로이드 개발, 스토어 출시까지 함께할 수 있습니다.<br><br>비용과 기간은 기능 범위에 따라 달라져요. 만들고 싶은 앱의 <b>주요 기능, 희망 일정, 참고하는 앱</b>을 보내 주시면 검토한 뒤 안내해 드릴게요.',
+      links:[{t:'개발 문의 메일 쓰기',href:mailto('[고로소프트] 앱 개발 문의','1. 만들고 싶은 앱 한 줄 소개:\n2. 주요 기능:\n3. 희망 일정:\n4. 참고하는 앱(있다면):\n5. 연락처:\n'),pri:true},{t:'전화 '+TEL_TXT,href:'tel:'+TEL}]},
+    app:{q:'앱 출시 일정',
+      a:'고로소프트의 첫 앱은 <b>12월 정식 출시</b>를 목표로 준비하고 있어요.<br><br>출시 소식과 스토어 링크는 홈페이지 <a href="#news">소식</a>에서 가장 먼저 안내해 드릴게요.'},
+    login:{q:'회원가입·로그인 문제',
+      a:'회원가입은 <b>이메일 인증</b> 방식이에요. 인증 메일이 보이지 않으면 스팸함도 확인해 주세요.<br><br>비밀번호를 잊으셨다면 <a href="/reset/">비밀번호 찾기</a>에서 재설정 링크를 받을 수 있어요.',
+      links:[{t:'로그인',href:'/login/'},{t:'회원가입',href:'/signup/'}]},
+    member:{q:'회원 탈퇴·개인정보',
+      a:'로그인한 뒤 상단의 <b>마이페이지</b> 맨 아래에서 회원 탈퇴를 할 수 있어요.<br><br>수집하는 정보와 보관 기간은 <a href="/privacy/">개인정보처리방침</a>에서 확인할 수 있어요.'},
+    etc:{q:'기타 문의',
+      a:'아래 이메일이나 전화로 편하게 연락 주세요. 확인한 뒤 답변드릴게요.<br><br>이메일 '+MAIL+'<br>전화 '+TEL_TXT}
+  };
+  var ORDER=['dev','app','login','member','etc'];
+  var btn=document.getElementById('askBtn'), panel=document.getElementById('askMenu'), label=document.getElementById('askLabel'), log=document.getElementById('botLog');
+  var started=false, busy=false, reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function el(tag,cls,html){ var e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; }
+  function scroll(){ log.scrollTop=log.scrollHeight; }
+  function say(html){ log.appendChild(el('div','msg-b',html)); scroll(); }
+  function chips(list){
+    var box=el('div','chips');
+    list.forEach(function(c){
+      var b;
+      if(c.href){ b=el('a',c.pri?'pri':'',null); b.href=c.href; b.textContent=c.t; }
+      else { b=el('button','',null); b.type='button'; b.textContent=c.t; b.onclick=function(){ box.remove(); c.go(); }; }
+      box.appendChild(b);
+    });
+    log.appendChild(box); scroll(); return box;
+  }
+  function later(fn){
+    if(reduce){ fn(); return; }
+    busy=true; var t=el('div','msg-b typing','···'); log.appendChild(t); scroll();
+    setTimeout(function(){ t.remove(); busy=false; fn(); },550);
+  }
+  function menu(){
+    chips(ORDER.map(function(k){ return {t:TOPICS[k].q,go:function(){ pick(k); }}; }));
+  }
+  function pick(k){
+    if(busy) return; var T=TOPICS[k];
+    log.appendChild(el('div','msg-u',null)).textContent=T.q; scroll();
+    later(function(){
+      say(T.a);
+      var next=(T.links||CONTACT).slice();
+      next.push({t:'다른 질문 보기',go:function(){ later(function(){ say('또 궁금한 게 있으신가요?'); menu(); }); }});
+      chips(next);
+    });
+  }
+  function start(){
+    started=true;
+    say('안녕하세요, 고로소프트입니다 👋<br>어떤 내용이 궁금하신가요?');
+    menu();
+  }
+  function set(open){
+    panel.hidden=!open; btn.setAttribute('aria-expanded',open); label.textContent=open?'닫기':'문의하기';
+    if(open && !started) start();
+  }
+  btn.addEventListener('click',function(e){ e.stopPropagation(); set(panel.hidden); });
+  log.addEventListener('click',function(e){ var a=e.target.closest('a'); if(a && a.getAttribute('href')==='#news') set(false); });
+  document.addEventListener('click',function(e){ if(!panel.hidden && e.composedPath().indexOf(document.getElementById('ask'))<0) set(false); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape' && !panel.hidden){ set(false); btn.focus(); } });
 })();
 </script>
 </body>
