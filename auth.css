@@ -52,3 +52,5 @@ fieldset[disabled]{opacity:.4}
 .btn.full.sec{background:transparent;color:var(--text);border-color:var(--muted)}
 .btn.full.sec:disabled{opacity:.55}
 #verifyState{margin:10px 0 14px;font-size:14px;line-height:1.6}
+.remember{margin-top:12px;align-items:center}
+.remember input{margin-top:0;width:16px;height:16px;accent-color:var(--accent)}

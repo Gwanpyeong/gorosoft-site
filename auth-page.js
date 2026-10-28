@@ -222,6 +222,14 @@ if (q.get('deleted') === '1') setMsg('회원 탈퇴가 완료되었습니다. �
 if (q.get('changed') === '1') setMsg('비밀번호가 변경되었습니다. 새 비밀번호로 로그인해 주세요.', true);
 if (q.has('verified') || q.has('deleted') || q.has('changed')) history.replaceState(null, '', location.pathname);
 
+/* 로그인: [이메일 저장]을 켜 두면 다음에 이메일이 미리 채워집니다 (이 브라우저에만 저장, 비밀번호는 저장 안 함) */
+const REMEMBER_KEY = 'gs_login_email', remember = $('aRemember');
+if (mode === 'login' && remember) {
+  const saved = ls.get(REMEMBER_KEY);
+  if (saved && !emailIn.value) { emailIn.value = saved; remember.checked = true; if (pw) pw.focus(); }
+  remember.addEventListener('change', () => { if (!remember.checked) ls.del(REMEMBER_KEY); });
+}
+
 $('resendBtn').addEventListener('click', async () => {
   try {
     const a = await loadFirebase();
@@ -263,6 +271,7 @@ form.addEventListener('submit', async (e) => {
       done = '비밀번호 재설정 링크를 메일로 보냈습니다. 링크에서 새 비밀번호를 정한 뒤 로그인하세요. 로그인 후에는 마이페이지에서 언제든 바꿀 수 있습니다.';
     } else {
       const cred = await a.signInWithEmailAndPassword(auth, email, pass);
+      if (remember) { if (remember.checked) ls.set(REMEMBER_KEY, email); else ls.del(REMEMBER_KEY); }
       if (cred.user.emailVerified) {
         /* 이름 입력(가입 3단계)을 마치지 않은 계정은 가입 화면으로 이어서 보냅니다 */
         location.href = (await isRegistered(cred.user)) ? '/' : '/signup/';

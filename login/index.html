@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;800&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/auth.css?v=20261026b">
+<link rel="stylesheet" href="/auth.css?v=20261028e">
 </head>
 <body data-mode="login">
 <header class="top"><div class="bar">
@@ -25,9 +25,10 @@
   
   <form id="authForm">
     <div class="tbl">
-      <div class="f"><label for="aEmail">이메일<i>*</i></label><input id="aEmail" type="email" autocomplete="email" required></div>
+      <div class="f"><label for="aEmail">이메일<i>*</i></label><input id="aEmail" type="email" autocomplete="username" required></div>
       <div class="f"><label for="aPw">비밀번호<i>*</i></label><input id="aPw" type="password" minlength="8" autocomplete="current-password" required></div>
     </div>
+    <label class="agree remember"><input type="checkbox" id="aRemember"><span>이메일 저장</span></label>
     <p class="hint" id="pwMatch" hidden></p>
     
     <p class="msg" id="authMsg" role="status" aria-live="polite"></p>
@@ -37,6 +38,6 @@
   </form>
 </div></main>
 <footer>상호 고로소프트 · 대표자 노승현 · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a><br>© 2026 GOROSOFT. All rights reserved.</footer>
-<script type="module" src="/auth-page.js?v=20261028d"></script>
+<script type="module" src="/auth-page.js?v=20261028e"></script>
 </body>
 </html>
