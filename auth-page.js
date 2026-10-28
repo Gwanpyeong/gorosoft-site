@@ -216,7 +216,8 @@ if (mode === 'signup') {
 const q = new URLSearchParams(location.search);
 if (q.get('verified') === '1') setMsg('이메일 인증이 완료되었습니다. 로그인해 주세요.', true);
 if (q.get('deleted') === '1') setMsg('회원 탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.', true);
-if (q.has('verified') || q.has('deleted')) history.replaceState(null, '', location.pathname);
+if (q.get('changed') === '1') setMsg('비밀번호가 변경되었습니다. 새 비밀번호로 로그인해 주세요.', true);
+if (q.has('verified') || q.has('deleted') || q.has('changed')) history.replaceState(null, '', location.pathname);
 
 $('resendBtn').addEventListener('click', async () => {
   try {

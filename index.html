@@ -431,7 +431,13 @@ $('pwForm').addEventListener('submit', async (e) => {
     await a.reauthenticateWithCredential(u, a.EmailAuthProvider.credential(u.email, cur));
     await a.updatePassword(u, nw);
     $('pwForm').reset(); checkNewMatch();
-    say($('pwMsg'), '비밀번호를 변경했습니다.', true);
+    say($('pwMsg'), '비밀번호를 변경했습니다. 새 비밀번호로 다시 로그인해 주세요.', true);
+    /* 변경 후에는 로그아웃하고 로그인 화면으로 이동 (새 비밀번호로 다시 로그인) */
+    setTimeout(async () => {
+      try { await a.signOut(auth); } catch (_) {}
+      location.href = '/login/?changed=1';
+    }, 1500);
+    return;
   } catch (err) { say($('pwMsg'), errText(err)); }
   btn.disabled = false;
 });
