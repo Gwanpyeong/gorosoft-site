@@ -93,10 +93,17 @@ section.sec{padding:88px 0 0}
 .app p{color:var(--muted);margin:0 0 6px}
 .phone{justify-self:center;width:170px;height:340px;border:3px solid var(--line);border-radius:32px;background:var(--bg);position:relative;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.35)}
 .phone::before{content:"";position:absolute;top:9px;left:50%;width:46px;height:6px;border-radius:3px;background:var(--line);transform:translateX(-50%);z-index:2}
-/* 휴대폰 안 앱 화면: 분석 → 운행 → 영수증 인식 순서로 넘어감 */
-.scr{position:absolute;inset:26px 10px 10px;display:flex;flex-direction:column;gap:6px;font:500 9px/1.3 var(--sans);color:var(--text);opacity:0;animation:scr 12s infinite}
-.scr:nth-of-type(2){animation-delay:4s}.scr:nth-of-type(3){animation-delay:8s}
-@keyframes scr{0%{opacity:0;transform:translateX(30px)}4%,30%{opacity:1;transform:none}34%,100%{opacity:0;transform:translateX(-30px)}}
+/* 휴대폰 안 앱 화면: 고로소프트 로고(3초) → 분석 → 운행 → 영수증 인식(각 4초), 15초마다 반복 */
+.scr{position:absolute;inset:26px 10px 10px;display:flex;flex-direction:column;gap:6px;font:500 9px/1.3 var(--sans);color:var(--text);opacity:0;animation:scr 15s infinite}
+.scr:nth-of-type(2){animation-delay:3s}.scr:nth-of-type(3){animation-delay:7s}.scr:nth-of-type(4){animation-delay:11s}
+@keyframes scr{0%{opacity:0;transform:translateX(30px)}3%,24%{opacity:1;transform:none}27%,100%{opacity:0;transform:translateX(-30px)}}
+.scr.splash{inset:0;align-items:center;justify-content:center;gap:12px;animation-name:splash;animation-delay:0s}
+@keyframes splash{0%{opacity:0;transform:scale(.9)}3%,17%{opacity:1;transform:none}20%,100%{opacity:0;transform:scale(1.04)}}
+.scr.splash svg{width:62px;height:62px}
+.scr.splash svg .bar{transform-origin:15px 54px;animation:logobar 15s infinite}
+@keyframes logobar{0%,3%{transform:scaleX(0)}9%,100%{transform:scaleX(1)}}
+.scr.splash b{font:800 13px var(--sans);letter-spacing:.14em}
+.scr.splash span{font:500 9px var(--sans);color:var(--muted)}
 .scr .hd{display:flex;justify-content:space-between;color:var(--muted);font-size:8px}
 .scr .hd b{color:var(--text);font-size:10px}
 .scr .big{background:var(--accent);color:#121316;border-radius:8px;padding:8px}
@@ -107,21 +114,21 @@ section.sec{padding:88px 0 0}
 .scr .k{color:var(--muted);font-size:7.5px}
 .scr .br{display:grid;grid-template-columns:28px 1fr;align-items:center;gap:5px;font-size:7.5px;color:var(--muted)}
 .scr .br i{height:5px;border-radius:3px;background:var(--line);overflow:hidden;display:block}
-.scr .br i::after{content:"";display:block;height:100%;width:var(--w);background:var(--c,var(--accent));border-radius:3px;transform-origin:left;animation:bar 12s infinite}
-@keyframes bar{0%,3%{transform:scaleX(0)}12%,100%{transform:scaleX(1)}}
+.scr .br i::after{content:"";display:block;height:100%;width:var(--w);background:var(--c,var(--accent));border-radius:3px;transform-origin:left;animation:bar 15s 3s infinite}
+@keyframes bar{0%,2%{transform:scaleX(0)}10%,100%{transform:scaleX(1)}}
 .scr .it{display:flex;justify-content:space-between;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px}
 .scr .it b{font-size:9px}.scr .it span{font:700 9px var(--mono)}
 .rc{background:#FAFAF6;color:#222;font:8px/1.5 var(--mono);padding:8px;border-radius:3px;position:relative;overflow:hidden;transform:rotate(-1.5deg)}
 .rc p{display:flex;justify-content:space-between;margin:0}
 .rc,.rc span,.rc b{color:#1a1a1a}
 .rc{font-size:9px;padding:10px}
-.rc .h{animation:hl 12s infinite;animation-delay:8s;border-radius:2px}
-.rc::after{content:"";position:absolute;left:0;right:0;height:2px;background:var(--accent);box-shadow:0 0 8px 2px rgba(181,224,75,.7);top:0;animation:scan 12s infinite;animation-delay:8s}
-@keyframes scan{0%,4%{top:0;opacity:1}16%{top:100%;opacity:1}17%,100%{opacity:0}}
-@keyframes hl{0%,15%{background:transparent}18%,100%{background:rgba(181,224,75,.55)}}
-.scr .ok{color:var(--accent);text-align:center;font-weight:700;opacity:0;animation:ok 12s infinite;animation-delay:8s}
-@keyframes ok{0%,17%{opacity:0}20%,100%{opacity:1}}
-@media (prefers-reduced-motion:reduce){.scr{animation:none}.scr:first-of-type{opacity:1}.scr .br i::after,.rc::after,.rc .h,.scr .ok{animation:none}.scr .ok{opacity:1}}
+.rc .h{animation:hl 15s infinite;animation-delay:11s;border-radius:2px}
+.rc::after{content:"";position:absolute;left:0;right:0;height:2px;background:var(--accent);box-shadow:0 0 8px 2px rgba(181,224,75,.7);top:0;animation:scan 15s infinite;animation-delay:11s}
+@keyframes scan{0%,3%{top:0;opacity:1}13%{top:100%;opacity:1}14%,100%{opacity:0}}
+@keyframes hl{0%,12%{background:transparent}15%,100%{background:rgba(181,224,75,.55)}}
+.scr .ok{color:var(--accent);text-align:center;font-weight:700;opacity:0;animation:ok 15s infinite;animation-delay:11s}
+@keyframes ok{0%,14%{opacity:0}16%,100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.scr{animation:none}.scr.splash{opacity:1}.scr.splash svg .bar{animation:none}.scr .br i::after,.rc::after,.rc .h,.scr .ok{animation:none}.scr .ok{opacity:1}}
 .news{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .news li{display:grid;grid-template-columns:110px 1fr;gap:6px 24px;padding:20px 4px;border-bottom:1px solid var(--line)}
 @media (max-width:560px){.news li{grid-template-columns:1fr}}
@@ -281,6 +288,10 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
           <p>출시 소식과 스토어 링크는 이 페이지에서 가장 먼저 안내합니다.</p>
         </div>
         <div class="phone" role="img" aria-label="개발 중인 첫 앱 화면 미리보기: 월별 지출 분석, 운행 기록, 영수증 자동 인식">
+          <div class="scr splash" aria-hidden="true">
+            <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#1A1C20"/><path d="M32.72 42.58C41.98 42.58 48.63 36.8 48.63 27.15V22.39H33.13V28.68H40.36C40.26 32.61 37.57 35.06 32.79 35.06C27.33 35.06 24.13 31.01 24.13 23.97C24.13 16.98 27.5 12.98 32.76 12.98C36.33 12.98 38.76 14.75 39.58 17.74H48.24C47.35 10.53 40.92 5.46 32.62 5.46C22.99 5.46 15.37 12.28 15.37 24.09C15.37 35.52 22.38 42.58 32.72 42.58Z" fill="#EEF0F3"/><rect class="bar" x="15.37" y="50.75" width="33.26" height="7.8" fill="#B5E04B"/></svg>
+            <b>GOROSOFT</b><span>GORO Drive</span>
+          </div>
           <div class="scr" aria-hidden="true">
             <div class="hd"><b>10월 분석</b><span>GORO</span></div>
             <div class="big">이번 달 지출<b>₩206,000</b></div>
