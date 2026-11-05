@@ -91,9 +91,37 @@ section.sec{padding:88px 0 0}
 .badge{display:inline-block;font:600 12px/1 var(--sans);letter-spacing:.14em;color:#121316;background:var(--accent);padding:7px 10px;border-radius:5px;margin:0 0 16px}
 .app h3{font:800 clamp(22px,3.4vw,30px)/1.3 var(--sans);margin:0 0 10px}
 .app p{color:var(--muted);margin:0 0 6px}
-.phone{justify-self:center;width:150px;height:290px;border:3px solid var(--line);border-radius:30px;background:var(--bg);position:relative}
-.phone::before{content:"";position:absolute;top:10px;left:50%;width:46px;height:6px;border-radius:3px;background:var(--line);transform:translateX(-50%)}
-.phone span{position:absolute;left:50%;top:50%;width:54px;height:6px;background:var(--accent);transform:translate(-50%,-50%)}
+.phone{justify-self:center;width:170px;height:340px;border:3px solid var(--line);border-radius:32px;background:var(--bg);position:relative;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.phone::before{content:"";position:absolute;top:9px;left:50%;width:46px;height:6px;border-radius:3px;background:var(--line);transform:translateX(-50%);z-index:2}
+/* 휴대폰 안 앱 화면: 분석 → 운행 → 영수증 인식 순서로 넘어감 */
+.scr{position:absolute;inset:26px 10px 10px;display:flex;flex-direction:column;gap:6px;font:500 9px/1.3 var(--sans);color:var(--text);opacity:0;animation:scr 12s infinite}
+.scr:nth-of-type(2){animation-delay:4s}.scr:nth-of-type(3){animation-delay:8s}
+@keyframes scr{0%{opacity:0;transform:translateX(30px)}4%,30%{opacity:1;transform:none}34%,100%{opacity:0;transform:translateX(-30px)}}
+.scr .hd{display:flex;justify-content:space-between;color:var(--muted);font-size:8px}
+.scr .hd b{color:var(--text);font-size:10px}
+.scr .big{background:var(--accent);color:#121316;border-radius:8px;padding:8px}
+.scr .big b{display:block;font:800 16px var(--mono);margin-top:2px}
+.scr .two{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.scr .bx{background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px}
+.scr .bx b{display:block;font:700 11px var(--mono);margin-top:1px}
+.scr .k{color:var(--muted);font-size:7.5px}
+.scr .br{display:grid;grid-template-columns:28px 1fr;align-items:center;gap:5px;font-size:7.5px;color:var(--muted)}
+.scr .br i{height:5px;border-radius:3px;background:var(--line);overflow:hidden;display:block}
+.scr .br i::after{content:"";display:block;height:100%;width:var(--w);background:var(--c,var(--accent));border-radius:3px;transform-origin:left;animation:bar 12s infinite}
+@keyframes bar{0%,3%{transform:scaleX(0)}12%,100%{transform:scaleX(1)}}
+.scr .it{display:flex;justify-content:space-between;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px}
+.scr .it b{font-size:9px}.scr .it span{font:700 9px var(--mono)}
+.rc{background:#FAFAF6;color:#222;font:8px/1.5 var(--mono);padding:8px;border-radius:3px;position:relative;overflow:hidden;transform:rotate(-1.5deg)}
+.rc p{display:flex;justify-content:space-between;margin:0}
+.rc,.rc span,.rc b{color:#1a1a1a}
+.rc{font-size:9px;padding:10px}
+.rc .h{animation:hl 12s infinite;animation-delay:8s;border-radius:2px}
+.rc::after{content:"";position:absolute;left:0;right:0;height:2px;background:var(--accent);box-shadow:0 0 8px 2px rgba(181,224,75,.7);top:0;animation:scan 12s infinite;animation-delay:8s}
+@keyframes scan{0%,4%{top:0;opacity:1}16%{top:100%;opacity:1}17%,100%{opacity:0}}
+@keyframes hl{0%,15%{background:transparent}18%,100%{background:rgba(181,224,75,.55)}}
+.scr .ok{color:var(--accent);text-align:center;font-weight:700;opacity:0;animation:ok 12s infinite;animation-delay:8s}
+@keyframes ok{0%,17%{opacity:0}20%,100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.scr{animation:none}.scr:first-of-type{opacity:1}.scr .br i::after,.rc::after,.rc .h,.scr .ok{animation:none}.scr .ok{opacity:1}}
 .news{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .news li{display:grid;grid-template-columns:110px 1fr;gap:6px 24px;padding:20px 4px;border-bottom:1px solid var(--line)}
 @media (max-width:560px){.news li{grid-template-columns:1fr}}
@@ -252,7 +280,29 @@ dialog::backdrop{background:rgba(5,8,16,.72)}
           <h3>첫 앱을 준비하고 있습니다</h3>
           <p>출시 소식과 스토어 링크는 이 페이지에서 가장 먼저 안내합니다.</p>
         </div>
-        <div class="phone" role="img" aria-label="준비 중인 앱 화면 자리"><span></span></div>
+        <div class="phone" role="img" aria-label="개발 중인 첫 앱 화면 미리보기: 월별 지출 분석, 운행 기록, 영수증 자동 인식">
+          <div class="scr" aria-hidden="true">
+            <div class="hd"><b>10월 분석</b><span>GORO</span></div>
+            <div class="big">이번 달 지출<b>₩206,000</b></div>
+            <div class="two"><div class="bx"><span class="k">운행거리</span><b>581km</b></div><div class="bx"><span class="k">연비</span><b>13km/L</b></div></div>
+            <div class="bx" style="display:grid;gap:5px"><span class="k">항목별 비용</span>
+              <div class="br">주유<i style="--w:90%"></i></div><div class="br">정비<i style="--w:62%;--c:#FF8A80"></i></div><div class="br">주차<i style="--w:24%;--c:#F6C453"></i></div><div class="br">통행<i style="--w:18%;--c:#4FD1C5"></i></div>
+            </div>
+          </div>
+          <div class="scr" aria-hidden="true">
+            <div class="hd"><b>운행 기록</b><span>14회</span></div>
+            <div class="it"><b>집 → 고객사</b><span>31km</span></div>
+            <div class="it"><b>사무실 → 청주</b><span>118km</span></div>
+            <div class="it"><b>집 → 사무실</b><span>23km</span></div>
+            <div class="it"><b>평택 → 집</b><span>49km</span></div>
+            <div class="it" style="border-color:var(--accent)"><b>업무 운행기록부</b><span style="color:var(--accent)">PDF</span></div>
+          </div>
+          <div class="scr" aria-hidden="true">
+            <div class="hd"><b>영수증 인식</b><span>NEW</span></div>
+            <div class="rc"><p style="justify-content:center"><b>셀프주유소</b></p><p class="h"><span>일시</span><span>10-28</span></p><p class="h"><span>유종</span><span>휘발유</span></p><p class="h"><span>수량</span><span>41.2L</span></p><p class="h"><span><b>합계</b></span><span><b>67,980</b></span></p></div>
+            <p class="ok">자동 입력 완료 ✓</p>
+          </div>
+        </div>
       </div>
     </section>
 
