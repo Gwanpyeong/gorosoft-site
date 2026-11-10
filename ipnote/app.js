@@ -466,6 +466,7 @@ async function start() {
   $('deny-logout').addEventListener('click', logout);
 
   authMod.onAuthStateChanged(auth, u => {
+    if (window.__hideSplash) window.__hideSplash();
     unsubs.forEach(f => f()); unsubs = []; db = null;
     if (!u) { view('login-view'); conn.textContent = ''; return }
     if (!u.emailVerified) {
