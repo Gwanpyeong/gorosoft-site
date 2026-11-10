@@ -1,7 +1,7 @@
 /* 현장 IP 기록 — 화면 파일만 기기에 저장해 두고, 데이터는 Firestore가 따로 관리합니다.
    화면 파일은 "네트워크 먼저, 안 되면 저장본" 방식이라 업데이트가 바로 반영됩니다. */
-const CACHE = 'ipnote-v20261110a';
-const SHELL = ['/ipnote/', '/ipnote/app.js?v=20261110a', '/firebase-config.js?v=20261026b', '/ipnote/manifest.webmanifest', '/ipnote/icon-180.png', '/ipnote/icon-192.png'];
+const CACHE = 'ipnote-v20261110b';
+const SHELL = ['/ipnote/', '/ipnote/app.js?v=20261110b', '/firebase-config.js?v=20261026b', '/ipnote/manifest.webmanifest', '/ipnote/icon-180.png', '/ipnote/icon-192.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

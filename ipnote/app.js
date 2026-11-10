@@ -468,12 +468,9 @@ async function start() {
   authMod.onAuthStateChanged(auth, u => {
     unsubs.forEach(f => f()); unsubs = []; db = null;
     if (!u) { view('login-view'); conn.textContent = ''; return }
-    if (!u.emailVerified) {
-      view('deny-view'); conn.textContent = '';
-      $('deny-text').textContent = `${u.email} 계정의 이메일 인증이 아직 끝나지 않았습니다. 고로소프트 로그인 화면에서 인증을 마친 뒤 다시 열어 주세요.`;
-      return;
-    }
-    me = { uid: u.uid, name: u.displayName || (u.email || '').split('@')[0] };
+    /* 이메일 인증 여부는 따지지 않습니다. 관리자가 콘솔에서 만든 게스트 계정도 쓸 수 있고,
+       누가 볼 수 있는지는 Firestore 보안 규칙(허용 이메일·UID 목록)이 정합니다. */
+    me ={ uid: u.uid, name: u.displayName || (u.email || '').split('@')[0] };
     $('who').textContent = u.email || '';
     view('app-view');
     db = makeDb(fsMod, fdb);
@@ -492,7 +489,7 @@ async function start() {
       if (err && err.code === 'permission-denied') {
         unsubs.forEach(f => f()); unsubs = [];
         view('deny-view'); conn.textContent = '';
-        $('deny-text').textContent = `${u.email} 계정은 아직 현장 IP 기록 사용이 허용되지 않았습니다. 관리자에게 이 이메일을 허용해 달라고 요청하세요.`;
+        $('deny-text').textContent = `${u.email} 계정은 아직 현장 IP 기록 사용이 허용되지 않았습니다. 관리자에게 허용을 요청하세요.`;
       } else { conn.textContent = '연결이 끊겼습니다 — 앱을 다시 열어 주세요'; conn.classList.add('off') }
     });
     unsubs = ['sites', 'areas', 'lines', 'pcs'].map(sub);
