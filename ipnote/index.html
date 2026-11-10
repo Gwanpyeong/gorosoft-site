@@ -103,9 +103,31 @@ details.panel[open] summary::after{content:"－"}
 .foot{text-align:center;font-size:12px;color:var(--muted);padding-top:8px}
 .foot button{min-height:32px;font-size:12px;color:var(--muted)}
 @media (prefers-reduced-motion: no-preference){button,.ipchip{transition:background-color .12s,border-color .12s}}
+/* 시작 화면: 홈페이지 앱 미리보기와 같은 고로소프트 로고(아래 라임 막대가 그려지며 등장) */
+#splash{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .35s ease,visibility .35s}
+#splash.out{opacity:0;visibility:hidden}
+#splash svg{width:96px;height:96px;animation:splashIn .5s ease-out both}
+#splash svg .bar{transform-origin:15.37px 54px;animation:logobar .7s .25s cubic-bezier(.2,.8,.2,1) both}
+#splash b{font:800 18px/1 var(--f-body);letter-spacing:.14em;animation:splashIn .5s .15s ease-out both}
+#splash span{font:500 13px/1 var(--f-body);color:var(--muted);animation:splashIn .5s .3s ease-out both}
+@keyframes splashIn{from{opacity:0;transform:translateY(6px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes logobar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){#splash svg,#splash svg .bar,#splash b,#splash span{animation:none}}
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true">
+  <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#1A1C20"/><path d="M32.72 42.58C41.98 42.58 48.63 36.8 48.63 27.15V22.39H33.13V28.68H40.36C40.26 32.61 37.57 35.06 32.79 35.06C27.33 35.06 24.13 31.01 24.13 23.97C24.13 16.98 27.5 12.98 32.76 12.98C36.33 12.98 38.76 14.75 39.58 17.74H48.24C47.35 10.53 40.92 5.46 32.62 5.46C22.99 5.46 15.37 12.28 15.37 24.09C15.37 35.52 22.38 42.58 32.72 42.58Z" fill="#EEF0F3"/><rect class="bar" x="15.37" y="50.75" width="33.26" height="7.8" fill="#B5E04B"/></svg>
+  <b>GOROSOFT</b>
+  <span>현장 IP 기록</span>
+</div>
+<script>
+/* 로고를 최소 1.2초 보여주고, 로그인 확인이 끝나면 사라짐(늦어도 4초 뒤엔 사라짐) */
+(function(){var t0=Date.now(),done=false;
+  window.__hideSplash=function(){if(done)return;done=true;var el=document.getElementById('splash');
+    setTimeout(function(){el.classList.add('out');setTimeout(function(){el.remove()},400)},Math.max(0,1200-(Date.now()-t0)))};
+  setTimeout(window.__hideSplash,4000);})();
+</script>
 <header class="topbar"><div class="in">
   <a class="brand" href="/" aria-label="고로소프트 홈으로"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="11.5" fill="#121316"/><path d="M32.72 42.58C41.98 42.58 48.63 36.8 48.63 27.15V22.39H33.13V28.68H40.36C40.26 32.61 37.57 35.06 32.79 35.06C27.33 35.06 24.13 31.01 24.13 23.97C24.13 16.98 27.5 12.98 32.76 12.98C36.33 12.98 38.76 14.75 39.58 17.74H48.24C47.35 10.53 40.92 5.46 32.62 5.46C22.99 5.46 15.37 12.28 15.37 24.09C15.37 35.52 22.38 42.58 32.72 42.58Z" fill="#ffffff"/><rect x="15.37" y="50.75" width="33.26" height="7.80" fill="#b5e04b"/></svg></a>
   <h1 class="apptitle">현장 IP 기록</h1>
@@ -214,6 +236,6 @@ details.panel[open] summary::after{content:"－"}
   <div class="foot"><span id="who"></span> · <button type="button" class="ghost" id="logout">로그아웃</button></div>
 </main>
 
-<script type="module" src="/ipnote/app.js?v=20261110a"></script>
+<script type="module" src="/ipnote/app.js?v=20261110c"></script>
 </body>
 </html>
