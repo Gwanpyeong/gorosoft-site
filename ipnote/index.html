@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>현장 IP 기록 | GOROSOFT</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#121316">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IP 기록">
+<link rel="manifest" href="/ipnote/manifest.webmanifest">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/ipnote/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* 고로소프트 사이트 팔레트(어두운 화면 + 라임 포인트)에 맞춘 현장용 한 열 레이아웃 */
+:root{
+  color-scheme:dark;
+  --bg:#121316; --surface:#1a1c20; --sunk:#212329; --line:#2b2e35;
+  --fg:#eef0f3; --muted:#9aa1ad; --accent:#b5e04b; --accent-fg:#14170c;
+  --ok:#7fd99a; --ok-soft:#1b3324; --fail:#ff8a80; --fail-soft:#3b1d1b;
+  --off:#f1c14e; --off-soft:#3a2f12;
+  --f-body:"Noto Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r:12px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--fg)}
+body{font:400 15px/1.5 var(--f-body);-webkit-text-size-adjust:100%;min-height:100vh}
+.topbar{position:sticky;top:0;z-index:5;background:rgba(18,19,22,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.topbar .in{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:10px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:center;gap:8px;color:var(--fg);text-decoration:none;font:800 13px/1 var(--f-body);letter-spacing:.06em}
+.brand svg{width:26px;height:26px;display:block}
+.apptitle{font:700 16px/1.2 var(--f-body);margin:0;flex:1;min-width:0}
+.status-line{font-size:12px;color:var(--muted);white-space:nowrap}
+.status-line.off{color:var(--off)}
+.wrap{max-width:640px;margin:0 auto;padding-block:16px calc(48px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+h2{font-size:13px;margin:0;font-weight:700;color:var(--muted);letter-spacing:.04em}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.note{font-size:13px;color:var(--muted)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grow{flex:1 1 140px;min-width:0}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:8px 12px;min-height:42px;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);font-weight:700}
+button.ghost{background:transparent;border-color:transparent;color:var(--accent);padding-inline:6px}
+button.danger{color:var(--fail);border-color:var(--fail)}
+button:disabled{opacity:.5;cursor:not-allowed}
+input,select,textarea{font:inherit;font-size:16px;color:var(--fg);background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-height:44px;width:100%}
+textarea{min-height:96px;resize:vertical}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);min-width:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border-radius:999px;padding:6px 12px;min-height:38px;background:var(--sunk)}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);font-weight:700}
+.chip .n{font-family:var(--f-mono);font-size:12px;opacity:.75;margin-left:4px}
+.chip .d{font-size:12px;opacity:.75;margin-right:6px;font-variant-numeric:tabular-nums}
+.sum-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.sum-title{font-size:18px;font-weight:800}
+.big{font-family:var(--f-mono);font-size:26px;font-weight:600}
+.bar{height:10px;border-radius:5px;background:var(--sunk);overflow:hidden;display:flex}
+.bar span{display:block;height:100%}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px}
+.legend b{font-family:var(--f-mono);font-weight:600}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle;background:var(--c)}
+.s-ok{--c:var(--ok);--cs:var(--ok-soft)}
+.s-reinstall{--c:var(--fail);--cs:var(--fail-soft)}
+.s-review{--c:var(--off);--cs:var(--off-soft)}
+.ipbox{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:8px;background:var(--sunk);overflow:hidden}
+.ipbox .pre{padding:0 2px 0 10px;display:flex;align-items:center;font-family:var(--f-mono);color:var(--muted);white-space:nowrap}
+.ipbox input{border:0;border-radius:0;font-family:var(--f-mono);font-size:20px;min-height:52px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button{padding:8px 4px;font-size:13px;min-height:44px;background:var(--sunk)}
+.seg button[aria-pressed="true"]{background:var(--cs);border-color:var(--c);color:var(--fg);font-weight:700}
+.msg{font-size:13px;padding:8px 10px;border-radius:8px;background:var(--sunk)}
+.msg.warn{background:var(--off-soft)} .msg.err{background:var(--fail-soft)} .msg.good{background:var(--ok-soft)}
+.line-card{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.line-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--sunk);flex-wrap:wrap}
+.line-name{font-weight:700;flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+.count{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.count.full{color:var(--ok);font-weight:600}
+.ips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px}
+.ipchip{font-family:var(--f-mono);font-size:14px;border-radius:6px;padding:5px 9px;min-height:36px;background:var(--cs);border:1px solid transparent;color:var(--fg)}
+.ipchip[aria-expanded="true"]{border-color:var(--c);box-shadow:0 0 0 1px var(--c)}
+.ipchip .memo-mark{font-family:var(--f-body);font-size:11px;color:var(--muted);margin-left:4px}
+.empty-ips{padding:10px 12px;font-size:13px;color:var(--muted)}
+.editor{border-top:1px dashed var(--line);padding:12px;display:flex;flex-direction:column;gap:10px}
+.empty{padding:24px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:var(--r)}
+details.panel summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:28px}
+details.panel summary::-webkit-details-marker{display:none}
+details.panel summary::after{content:"＋";color:var(--muted)}
+details.panel[open] summary::after{content:"－"}
+.cmp-list{font-family:var(--f-mono);font-size:13px;display:flex;flex-wrap:wrap;gap:4px 10px;max-height:180px;overflow:auto}
+.login{max-width:420px;margin:24px auto 0;width:100%}
+.login h1{font:800 22px/1.3 var(--f-body);margin:0}
+.login a{color:var(--accent)}
+.foot{text-align:center;font-size:12px;color:var(--muted);padding-top:8px}
+.foot button{min-height:32px;font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion: no-preference){button,.ipchip{transition:background-color .12s,border-color .12s}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="in">
+  <a class="brand" href="/" aria-label="고로소프트 홈으로"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="11.5" fill="#121316"/><path d="M32.72 42.58C41.98 42.58 48.63 36.8 48.63 27.15V22.39H33.13V28.68H40.36C40.26 32.61 37.57 35.06 32.79 35.06C27.33 35.06 24.13 31.01 24.13 23.97C24.13 16.98 27.5 12.98 32.76 12.98C36.33 12.98 38.76 14.75 39.58 17.74H48.24C47.35 10.53 40.92 5.46 32.62 5.46C22.99 5.46 15.37 12.28 15.37 24.09C15.37 35.52 22.38 42.58 32.72 42.58Z" fill="#ffffff"/><rect x="15.37" y="50.75" width="33.26" height="7.80" fill="#b5e04b"/></svg></a>
+  <h1 class="apptitle">현장 IP 기록</h1>
+  <span class="status-line" id="conn">불러오는 중…</span>
+</div></header>
+
+<!-- 로그인 -->
+<main class="wrap" id="login-view" hidden>
+  <form class="panel login" id="login-form">
+    <h1>로그인</h1>
+    <div class="note">고로소프트 계정으로 로그인하세요. 허용된 계정만 기록을 볼 수 있습니다.</div>
+    <label class="f">이메일<input id="lg-email" type="email" autocomplete="username" required></label>
+    <label class="f">비밀번호<input id="lg-pw" type="password" autocomplete="current-password" required></label>
+    <button class="primary" id="lg-btn" type="submit" style="min-height:48px">로그인</button>
+    <div id="lg-msg" class="msg" hidden></div>
+    <div class="note">계정이 없으면 <a href="/signup/">회원가입</a> · <a href="/reset/">비밀번호 찾기</a></div>
+  </form>
+</main>
+
+<!-- 권한 없음 -->
+<main class="wrap" id="deny-view" hidden>
+  <div class="panel login">
+    <h1>사용 권한이 없습니다</h1>
+    <div class="note" id="deny-text"></div>
+    <button type="button" id="deny-logout">다른 계정으로 로그인</button>
+  </div>
+</main>
+
+<main class="wrap" id="app-view" hidden>
+  <!-- 지역 · 동 선택 -->
+  <section class="panel" aria-labelledby="h-site">
+    <div class="row" style="justify-content:space-between">
+      <h2 id="h-site">지역</h2>
+      <button class="ghost" id="btn-site-new" type="button">+ 지역 추가</button>
+    </div>
+    <div class="chips" id="site-list"></div>
+    <form id="site-form" class="row" hidden>
+      <input id="sf-name" placeholder="예: 부산, 천안" style="flex:1 1 160px;width:auto">
+      <button type="button" id="sf-cancel">취소</button>
+      <button type="submit" class="primary">추가</button>
+    </form>
+    <div id="sf-msg" class="msg" hidden></div>
+    <div style="border-top:1px solid var(--line)"></div>
+    <div class="row" style="justify-content:space-between">
+      <h2 id="h-area">동</h2>
+      <button class="ghost" id="btn-area-new" type="button" hidden>+ 동 추가</button>
+    </div>
+    <div id="area-list"></div>
+    <form id="area-form" class="panel" style="background:var(--sunk)" hidden>
+      <div class="note" id="af-site-label"></div>
+      <div class="row">
+        <label class="f grow">동<input id="af-dong" placeholder="CJ1-G2" required></label>
+        <label class="f" style="flex:0 1 120px">계획 대수<input id="af-planned" type="number" min="0" inputmode="numeric" placeholder="66"></label>
+      </div>
+      <div class="row">
+        <label class="f grow">작업일<input id="af-date" type="date"></label>
+      </div>
+      <div class="row" id="af-del-row" hidden style="border-top:1px dashed var(--line);padding-top:10px">
+        <button type="button" class="danger" id="af-delete">동 삭제</button>
+      </div>
+      <div class="row" style="justify-content:flex-end">
+        <button type="button" id="af-cancel">취소</button>
+        <button type="submit" class="primary" id="af-submit">저장</button>
+      </div>
+      <div id="af-msg" class="msg" hidden></div>
+    </form>
+  </section>
+
+  <section class="panel" id="summary" hidden></section>
+
+  <section class="panel" id="entry" aria-labelledby="h-entry" hidden>
+    <h2 id="h-entry">빠른 입력</h2>
+    <label class="f">라인 / 구역
+      <input id="in-line" list="dl-lines" placeholder="예: TE100/UTE100 조립라인" autocomplete="off">
+    </label>
+    <datalist id="dl-lines"></datalist>
+    <div class="chips" id="line-chips"></div>
+    <label class="f">IP <span id="ip-hint"></span>
+      <div class="ipbox"><span class="pre" id="ip-pre"></span><input id="in-ip" inputmode="decimal" autocomplete="off" enterkeyhint="done"></div>
+    </label>
+    <div class="seg" id="seg-status" role="group" aria-label="상태"></div>
+    <label class="f">메모 (선택)<input id="in-memo" placeholder="예: 전원 꺼짐, 담당자 부재"></label>
+    <button class="primary" id="btn-save" type="button" style="min-height:52px;font-size:16px">기록 저장</button>
+    <div id="entry-msg" class="msg" hidden></div>
+  </section>
+
+  <section id="lines" style="display:flex;flex-direction:column;gap:10px"></section>
+
+  <details class="panel" id="cmp" hidden>
+    <summary>콘솔 목록과 대조</summary>
+    <div class="note">관리 콘솔에서 내보낸 단말 목록(엑셀 열 복사 또는 CSV 내용)을 붙여넣으면 IP만 골라 현재 지역 기록과 비교합니다.</div>
+    <textarea id="cmp-text" class="mono" placeholder="172.30.54.48&#10;172.30.54.49&#10;…"></textarea>
+    <div class="row"><button type="button" id="cmp-run">대조하기</button></div>
+    <div id="cmp-out" style="display:flex;flex-direction:column;gap:10px"></div>
+  </details>
+
+  <section class="panel" id="export" hidden>
+    <h2>내보내기</h2>
+    <div class="row">
+      <button type="button" id="ex-site" class="grow">현재 지역 CSV</button>
+      <button type="button" id="ex-all" class="grow">전체 CSV</button>
+    </div>
+    <div id="ex-msg" class="msg" hidden></div>
+  </section>
+
+  <div class="foot"><span id="who"></span> · <button type="button" class="ghost" id="logout">로그아웃</button></div>
+</main>
+
+<script type="module" src="/ipnote/app.js?v=20261110a"></script>
+</body>
+</html>
