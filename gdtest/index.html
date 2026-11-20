@@ -155,9 +155,17 @@ tr:last-child td{border-bottom:0}
 .warn{color:var(--danger);font-size:12px;font-weight:700}
 .prev table{font-size:11.5px}
 .prev td,.prev th{padding:6px;white-space:nowrap}
+.photo{position:relative;height:300px;border-radius:14px;background:#2A2D33 center/contain no-repeat;overflow:hidden}
+.scanned{display:flex;gap:12px;align-items:center;background:var(--panel2);border-radius:12px;padding:10px;margin-bottom:10px}
+.scanned .thumb{width:54px;height:72px;border-radius:8px;background:#2A2D33 center/cover no-repeat;flex:none}
+.scanned b{display:block;font-size:14.5px}
+.scanned span{font-size:12.5px;color:var(--muted)}
+.raw{margin:0 0 14px;font-size:12.5px;color:var(--muted)}
+.raw summary{cursor:pointer;padding:2px 0}
+.raw pre{white-space:pre-wrap;word-break:break-all;font:11.5px/1.5 var(--mono);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;max-height:180px;overflow:auto;margin:6px 0 0}
 .found dd{margin:0;font-weight:700}
 @media (prefers-reduced-motion: no-preference){
-  .scanline{animation:scan 1.6s ease-in-out 1 forwards}
+  .scanline{animation:scan 1.6s ease-in-out infinite}
   @keyframes scan{from{top:0}90%{opacity:1}to{top:100%;opacity:0}}
   .sheet{animation:up .22s cubic-bezier(.2,.8,.2,1)} .fill{transition:width .5s cubic-bezier(.2,.8,.2,1)}
   @keyframes up{from{transform:translateY(30px);opacity:.4}}
@@ -409,7 +417,7 @@ function tripSheet(){
 }
 function costSheet(pre){
   pre = pre || {};
-  openSheet(`<h3>비용 기록</h3>${pre.amount ? '' : '<button type="button" class="scanbtn" id="sheetScan" style="margin-bottom:14px"><span class="cam"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span><b>영수증 찍어서 입력<span class="soon">NEW</span></b><span>찍으면 자동으로 채워져요</span></span></button>'}<form id="fCost">
+  openSheet(`<h3>비용 기록</h3>${pre.scanned ? scanHead(pre) : pre.manual ? '' : '<button type="button" class="scanbtn" id="sheetScan" style="margin-bottom:14px"><span class="cam"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span><b>영수증 찍어서 입력<span class="soon">NEW</span></b><span>찍으면 자동으로 채워져요</span></span></button>'}<form id="fCost">
     <div class="field"><label>항목</label>${segHTML('cCat', CATS.map(c=>({v:c.id,t:catName(c.id)})), pre.cat || 'fuel')}</div>
     <div class="two"><div class="field"><label for="cDate">날짜</label><input id="cDate" type="date" value="${pre.date || defaultDate()}" required></div><div class="field"><label for="cAmt">금액 (원)</label><input id="cAmt" type="number" inputmode="numeric" min="1" step="1" placeholder="예: 65000" value="${pre.amount || ''}" required></div></div>
     <div class="field" id="qtyField"><label for="cQty">${fuel().verb} (${fuel().unit}, 선택)</label><input id="cQty" type="number" inputmode="decimal" min="0" step="0.01" placeholder="입력하면 ${fuel().unit === 'L' ? '연비' : '효율'}를 계산해 드려요" value="${pre.qty || ''}"></div>
@@ -419,7 +427,7 @@ function costSheet(pre){
     const get = bindSeg('cCat');
     const syncQty = () => { $('qtyField').hidden = (get() || 'fuel') !== 'fuel'; };
     $('cCat').addEventListener('click', () => setTimeout(syncQty)); syncQty();
-    if ($('sheetScan')) $('sheetScan').onclick = scanSheet;
+    if ($('sheetScan')) $('sheetScan').onclick = () => scanStart('car');
     $('cancel').onclick = closeSheet;
     $('fCost').addEventListener('submit', e => { e.preventDefault();
       const a = parseInt($('cAmt').value, 10);
@@ -429,43 +437,194 @@ function costSheet(pre){
       month = $('cDate').value.slice(0,7); save(); closeSheet(); render(); toast('비용 기록을 저장했어요'); });
   });
 }
-/* 영수증 촬영 — 미리보기에서는 연료별 예시 영수증으로 인식 과정을 보여 줌.
-   실제 앱: 카메라 촬영 → 휴대폰 안에서 글자 인식(ML Kit) → 합계·날짜·항목·수량 찾기 → 사용자 확인 후 저장 */
-const RECEIPTS = {
-  gas:   {shop:'GORO 셀프주유소', kind:'유종', kindV:'휘발유', qty:41.2, unit:'L',   price:1650},
-  diesel:{shop:'GORO 셀프주유소', kind:'유종', kindV:'경유',   qty:45.1, unit:'L',   price:1520},
-  ev:    {shop:'GORO 급속충전소', kind:'충전', kindV:'DC콤보 급속', qty:32.5, unit:'kWh', price:347},
-  h2:    {shop:'GORO 수소충전소', kind:'연료', kindV:'수소', qty:4.2,  unit:'kg',  price:9900}
+/* ── 영수증 인식: 진짜 카메라 → 휴대폰(브라우저) 안에서 글자 인식(Tesseract, 한국어+영어) → 금액·날짜·항목 찾기 → 확인 후 저장
+   사진은 서버로 보내지 않음. 인식 데이터(약 2MB)는 처음 한 번만 받고 이후엔 저장본 사용 ── */
+const TESS_SRC = 'https://cdn.jsdelivr.net/npm/tesseract.js@7.0.0/dist/tesseract.min.js';
+let tessWorker = null, tessLoading = null, ocrProgress = () => {};
+function loadScript(src){ return new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => no(new Error('script')); document.head.appendChild(s); }); }
+function getWorker(){
+  if (tessWorker) return Promise.resolve(tessWorker);
+  if (!tessLoading) tessLoading = (window.Tesseract ? Promise.resolve() : loadScript(TESS_SRC))
+    .then(() => Tesseract.createWorker(['kor','eng'], 1, { logger: m => ocrProgress(m) }))
+    .then(w => w.setParameters({ preserve_interword_spaces: '1' }).then(() => (tessWorker = w)))
+    .catch(e => { tessLoading = null; throw e; });
+  return tessLoading;
+}
+/* 사진 고르기: camera=true면 카메라 바로 열기 */
+function pickPhoto(camera){
+  return new Promise(resolve => {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*'; if (camera) inp.setAttribute('capture', 'environment');
+    inp.style.display = 'none'; document.body.appendChild(inp);
+    inp.onchange = () => { const f = inp.files && inp.files[0]; inp.remove(); resolve(f || null); };
+    inp.click();
+  });
+}
+/* 인식 잘 되게: 긴 변 1800px로 맞추고 흑백 + 대비 늘리기 */
+function prepImage(file){
+  return new Promise((ok, no) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 1800 / Math.max(img.naturalWidth, img.naturalHeight));
+      const w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const g = c.getContext('2d'); g.drawImage(img, 0, 0, w, h);
+      const d = g.getImageData(0, 0, w, h), p = d.data, hist = new Uint32Array(256);
+      for (let i = 0; i < p.length; i += 4){ const y = (p[i]*299 + p[i+1]*587 + p[i+2]*114) / 1000 | 0; p[i] = y; hist[y]++; }
+      let lo = 0, hi = 255, acc = 0, n = w * h;
+      for (; lo < 255 && (acc += hist[lo]) < n * .02; lo++);
+      acc = 0; for (; hi > 0 && (acc += hist[hi]) < n * .02; hi--);
+      const span = Math.max(1, hi - lo);
+      for (let i = 0; i < p.length; i += 4){ const v = Math.max(0, Math.min(255, (p[i] - lo) * 255 / span)); p[i] = p[i+1] = p[i+2] = v; }
+      g.putImageData(d, 0, 0);
+      ok({ canvas: c, url });
+    };
+    img.onerror = () => no(new Error('image'));
+    img.src = url;
+  });
+}
+
+/* ── 글자 → 값 찾기 ── */
+const RX = {
+  toll: /도로공사|통행료|톨게이트|영업소|하이패스|고속도로/,
+  park: /주차/,
+  repair: /정비|카센터|타이어|엔진오일|오일교환|공업사|블루핸즈|오토큐|스피드메이트|자동차서비스/,
+  fuel: /주유|유종|휘발유|경유|셀프|오일뱅크|칼텍스|S-?OIL|에쓰오일|SK에너지|알뜰|충전|kWh|KWH|수소|급속|완속/i,
+  stay: /호텔|모텔|숙박|체크인|객실|트립닷컴|야놀자|여기어때|아고다|리조트|게스트하우스|펜션|HOTEL/i,
+  meal: /식당|음식|메뉴|인분|공기밥|김밥|국밥|커피|카페|치킨|고기|삼겹|한식|분식|정식|찌개|탕|면|식사|주점|맥주|소주|백반|돈까스|짜장|짬뽕|피자|버거|도시락|편의점|베이커리|빵/
 };
-function scanSheet(){
-  const d = new Date(), date = ymd(d), time = pad(d.getHours())+':'+pad(d.getMinutes());
-  const rc = RECEIPTS[car().fuel] || RECEIPTS.gas, amount = Math.round(rc.qty * rc.price);
-  const R = {cat:'fuel', amount, date, qty:rc.qty, memo:rc.kindV};
-  openSheet(`<h3>영수증 인식 <span class="soon">NEW</span></h3>
-    <div class="shot" aria-label="예시 영수증 사진"><div class="receipt">
-      <div class="c"><b>${rc.shop}</b><br>(예시 영수증)</div><div class="hr"></div>
-      <div class="l" data-f="date"><span>일시</span><span>${date} ${time}</span></div>
-      <div class="l" data-f="cat"><span>${rc.kind}</span><span>${rc.kindV}</span></div>
-      <div class="l" data-f="qty"><span>${rc.unit === 'L' ? '수량' : '충전량'}</span><span>${rc.qty.toFixed(2)} ${rc.unit}</span></div>
-      <div class="l"><span>단가</span><span>${rc.price.toLocaleString('ko-KR')}</span></div><div class="hr"></div>
-      <div class="l" data-f="amount"><span><b>합계</b></span><span><b>${amount.toLocaleString('ko-KR')}원</b></span></div>
-      <div class="l"><span>결제</span><span>신용카드</span></div>
-    </div><div class="scanline" id="scanline"></div></div>
-    <p id="scanStatus" style="text-align:center;color:var(--muted);margin:0 0 12px">글자를 읽는 중…</p>
-    <div id="scanResult" hidden>
-      <dl class="found"><dt>항목</dt><dd>${fuel().cost} (${rc.kindV})</dd><dt>금액</dt><dd class="num">${won(amount)}</dd><dt>날짜</dt><dd class="num">${date}</dd><dt>${fuel().verb}</dt><dd class="num">${qtyText(rc.qty)}</dd></dl>
-      <p class="note" style="margin:0 0 14px">사진은 휴대폰 안에서만 인식하고 서버로 보내지 않아요. 내용이 맞는지 확인해 주세요.</p>
-      <div class="row"><button type="button" class="btn" id="scanEdit">고쳐서 저장</button><button type="button" class="btn pri" id="scanSave">이대로 저장</button></div>
-    </div>
-    <p class="note" style="text-align:center;margin-top:12px">미리보기에서는 ${fuel().t} 차량용 예시 영수증으로 인식 과정만 보여 드려요.</p>`, () => {
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    setTimeout(() => {
-      document.querySelectorAll('.receipt .l[data-f]').forEach(l => l.classList.add('hit'));
-      $('scanStatus').textContent = '4개 항목을 찾았어요';
-      $('scanResult').hidden = false;
-      $('scanEdit').onclick = () => costSheet(R);
-      $('scanSave').onclick = () => { S.costs.push({id:uid(), ...R}); month = R.date.slice(0,7); tab = 'costs'; save(); closeSheet(); render(); toast('영수증 내용을 저장했어요'); };
-    }, reduce ? 50 : 1700);
+const SKIP_LINE = /부가세|부가가치|과세|면세|공급가|VAT|포인트|잔액|거스름|받은돈|받은금액|현금영수증|단가|할인|사업자|전화|TEL|카드번호|승인번호|가맹점|번호|No\.|주소/i;
+const AMT_KEYS = ['합계','결제금액','승인금액','받을금액','청구금액','총액','총금액','결제액','판매금액','카드결제','이용금액','통행료','요금','금액'];
+const toNum = s => +s.replace(/[^\d]/g, '');
+function numsIn(s){ return (s.match(/\d{1,3}(?:[,.]\d{3})+|\d{3,7}/g) || []).map(toNum).filter(v => v >= 100 && v <= 5000000); }
+function parseReceipt(text){
+  text = (text || '').normalize('NFKC');
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const flats = lines.map(l => l.replace(/\s+/g, ''));
+  const all = flats.join('\n');
+  /* 금액: 합계 같은 낱말이 있는 줄(또는 바로 다음 줄)의 가장 큰 수 → 없으면 전체에서 가장 큰 수 */
+  let amount = 0;
+  for (const k of AMT_KEYS){
+    for (let i = 0; i < flats.length && !amount; i++){
+      if (!flats[i].includes(k) || (k === '금액' && SKIP_LINE.test(flats[i]))) continue;
+      let v = numsIn(flats[i]);
+      if (!v.length && flats[i+1] && !SKIP_LINE.test(flats[i+1])) v = numsIn(flats[i+1]);
+      if (v.length) amount = Math.max(...v);
+    }
+    if (amount) break;
+  }
+  if (!amount){ const v = flats.filter(l => !SKIP_LINE.test(l) && !/\d{2}:\d{2}/.test(l)).flatMap(numsIn); if (v.length) amount = Math.max(...v); }
+  /* 날짜 */
+  let date = '';
+  const today = new Date(), okDate = (y,m,d) => { const t = new Date(y, m-1, d); return m >= 1 && m <= 12 && d >= 1 && d <= 31 && t <= new Date(today.getTime() + 864e5) && y >= today.getFullYear() - 1; };
+  let m = text.match(/(20\d{2})\s*[.\-\/년]\s*(\d{1,2})\s*[.\-\/월]\s*(\d{1,2})/);
+  if (m && okDate(+m[1], +m[2], +m[3])) date = m[1] + '-' + pad(+m[2]) + '-' + pad(+m[3]);
+  if (!date){ m = text.match(/(?:^|[^\d])(\d{2})\s*[.\-\/]\s*(\d{1,2})\s*[.\-\/]\s*(\d{1,2})(?!\d)/); if (m && okDate(2000 + +m[1], +m[2], +m[3])) date = '20' + m[1] + '-' + pad(+m[2]) + '-' + pad(+m[3]); }
+  if (!date) date = ymd(today);
+  const tm = text.match(/(?:^|[^\d])([01]?\d|2[0-3])\s*:\s*([0-5]\d)/), hour = tm ? +tm[1] : null;
+  /* 수량(주유량·충전량) */
+  let qty, unit = '';
+  const q = text.match(/(\d{1,3}(?:[.,]\d{1,3})?)\s*(ℓ|리터|L|l|kWh|KWH|kwh|kg|KG)(?![a-z])/);
+  if (q){ const v = parseFloat(q[1].replace(',', '.')); unit = /k?wh/i.test(q[2]) ? 'kWh' : /kg/i.test(q[2]) ? 'kg' : 'L';
+    if ((unit === 'L' && v >= 1 && v <= 200) || (unit === 'kWh' && v >= 1 && v <= 150) || (unit === 'kg' && v >= .3 && v <= 10)) qty = v; }
+  const fuelKind = (all.match(/고급휘발유|휘발유|경유|급속|완속|수소/) || [''])[0];
+  /* 가게 이름: 위쪽 줄 중 한글 2자 이상이고 안내 문구가 아닌 첫 줄 */
+  let shop = '';
+  for (const l of lines.slice(0, 6)){
+    const f = l.replace(/\s+/g, '');
+    if ((f.match(/[가-힣]/g) || []).length < 2 || /영수증|매출전표|전표|카드|신용|승인|고객용|사업자|대표|전화|TEL|주소|일시|날짜|감사|환영|POS|^\d/i.test(f)) continue;
+    shop = l.replace(/[^\w가-힣()&·\- ]/g, '').replace(/\s{2,}/g, ' ').trim().slice(0, 24); break;
+  }
+  return { amount, date, hour, qty, unit, fuelKind, shop, all, raw: text };
+}
+const FUEL_STRONG = /주유|유종|휘발유|경유|충전량|충전요금|충전기|kWh|수소충전/i;
+function carCat(r){ const a = r.all; return RX.toll.test(a) ? 'toll' : FUEL_STRONG.test(a) ? 'fuel' : RX.park.test(a) ? 'park' : RX.repair.test(a) ? 'repair' : RX.fuel.test(a) || r.qty ? 'fuel' : 'etc'; }
+function bizGuess(r){
+  const a = r.all;
+  if (RX.stay.test(a)){ const n = a.match(/(\d)\s*박/); return { cat:'숙박', desc: (n ? n[1] + '박' : '1박') }; }
+  if (RX.toll.test(a)) return { cat:'통행료', desc:'통행료' };
+  if (FUEL_STRONG.test(a)) return { cat:'주유', desc: [r.fuelKind || '주유', r.qty ? r.qty + (r.unit || 'L') : ''].filter(Boolean).join(' · ') };
+  if (RX.park.test(a)) return { cat:'주차', desc:'주차' };
+  if (RX.fuel.test(a) || r.qty) return { cat:'주유', desc: [r.fuelKind || '주유', r.qty ? r.qty + (r.unit || 'L') : ''].filter(Boolean).join(' · ') };
+  if (RX.meal.test(a)){ const ppl = a.match(/(\d)\s*인분/), h = r.hour; const meal = h == null ? '식사' : h < 10 ? '아침' : h < 15 ? '점심' : '저녁'; return { cat:'식대', desc: (ppl ? ppl[1] + '인 ' : '') + meal }; }
+  return { cat:'기타', desc:'' };
+}
+
+/* ── 촬영·인식 화면 ── */
+function scanStart(kind){
+  openSheet(`<h3>영수증 찍기</h3>
+    <p class="note" style="margin:0 0 14px">영수증 전체가 화면에 들어오게, 밝은 곳에서 평평하게 놓고 찍어 주세요. 사진은 이 휴대폰 안에서만 읽어요.</p>
+    <button type="button" class="bigscan" id="camBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>카메라로 찍기</button>
+    <div class="row" style="margin-top:10px"><button type="button" class="btn" id="libBtn">앨범에서 고르기</button><button type="button" class="btn" id="cancel">취소</button></div>`, () => {
+    $('cancel').onclick = closeSheet;
+    const go = cam => pickPhoto(cam).then(f => { if (f) scanRun(f, kind); });
+    $('camBtn').onclick = () => go(true);
+    $('libBtn').onclick = () => go(false);
+    getWorker().catch(() => {}); // 고르는 동안 인식 준비 미리 시작
+  });
+}
+function scanRun(file, kind){
+  openSheet(`<h3>영수증 인식</h3>
+    <div class="photo" id="photoBox"><div class="scanline"></div></div>
+    <p id="ocrMsg" style="text-align:center;color:var(--muted);margin:10px 0 6px">사진을 준비하는 중…</p>
+    <div class="track" style="margin:0 10px 14px"><div class="fill" id="ocrBar" style="width:4%;background:var(--accent)"></div></div>
+    <div class="row"><button type="button" class="btn" id="cancel">취소</button></div>`, () => {
+    let alive = true;
+    $('cancel').onclick = () => { alive = false; closeSheet(); };
+    const msg = t => { if (alive && $('ocrMsg')) $('ocrMsg').textContent = t; };
+    const bar = v => { if (alive && $('ocrBar')) $('ocrBar').style.width = Math.max(4, Math.round(v * 100)) + '%'; };
+    ocrProgress = m => {
+      if (m.status === 'recognizing text') { msg('글자를 읽는 중… ' + Math.round(m.progress * 100) + '%'); bar(.3 + m.progress * .7); }
+      else if (/load|initializ/i.test(m.status)) { msg(tessWorker ? '준비하는 중…' : '처음 한 번만 인식 데이터를 받는 중…'); bar(.05 + (m.progress || 0) * .25); }
+    };
+    let photoUrl = '';
+    prepImage(file).then(({ canvas, url }) => {
+      photoUrl = url;
+      const box = $('photoBox'); if (box) box.style.backgroundImage = `url("${url}")`;
+      msg(tessWorker ? '글자를 읽는 중…' : '처음 한 번만 인식 데이터를 받는 중…');
+      return getWorker().then(w => w.recognize(canvas));
+    }).then(({ data }) => {
+      if (!alive) return;
+      const r = parseReceipt(data.text || '');
+      r.photo = photoUrl;
+      if (kind === 'biz') bizConfirmSheet(r); else costSheet(scanToCost(r));
+    }).catch(err => {
+      if (!alive) return;
+      const offline = !navigator.onLine || /script|network|fetch/i.test(String(err && err.message));
+      msg(offline && !tessWorker ? '인식 데이터를 받지 못했어요. 인터넷 연결을 확인하고 다시 해 주세요.' : '사진을 읽지 못했어요. 다시 찍거나 직접 입력해 주세요.');
+      bar(0);
+      const row = document.querySelector('.sheet .row');
+      if (row) row.innerHTML = '<button type="button" class="btn" id="again">다시 찍기</button><button type="button" class="btn pri" id="manual">직접 입력</button>';
+      $('again').onclick = () => scanStart(kind);
+      $('manual').onclick = () => kind === 'biz' ? bizConfirmSheet({ amount:0, date:ymd(new Date()), shop:'', all:'', raw:'' }) : costSheet({ manual:true });
+    });
+  });
+}
+function scanToCost(r){
+  return { scanned:true, cat: carCat(r), amount: r.amount || '', date: r.date, qty: r.qty, memo: r.fuelKind || r.shop || '', raw: r.raw, photo: r.photo, found: [r.amount, r.qty].filter(Boolean).length };
+}
+function scanHead(pre){
+  return `<div class="scanned">${pre.photo ? `<div class="thumb" style="background-image:url('${pre.photo}')"></div>` : ''}<div><b>${pre.amount ? '읽어낸 내용을 확인해 주세요' : '금액을 찾지 못했어요'}</b><span>틀린 칸만 고쳐서 저장하면 돼요.</span></div></div>
+    ${pre.raw ? `<details class="raw"><summary>읽은 글자 보기</summary><pre>${esc(pre.raw)}</pre></details>` : ''}`;
+}
+function bizConfirmSheet(r){
+  const b = bizNow(), g = r.all ? bizGuess(r) : { cat:'기타', desc:'' };
+  openSheet(`<h3>출장 경비 확인</h3>${scanHead({ amount:r.amount, photo:r.photo, raw:r.raw })}<form id="fBizX">
+    <div class="field"><label>구분</label>${segHTML('xCat', BIZ_CATS.map(c=>({v:c,t:c})), g.cat)}</div>
+    <div class="two"><div class="field"><label for="xDate">날짜</label><input id="xDate" type="date" value="${r.date}" required></div><div class="field"><label for="xAmt">금액 (원)</label><input id="xAmt" type="number" inputmode="numeric" min="1" value="${r.amount || ''}" required></div></div>
+    <div class="field"><label for="xShop">사용처</label><input id="xShop" value="${esc(r.shop || '')}" placeholder="예: 청주 한식당" required></div>
+    <div class="field"><label for="xDesc">내역</label><input id="xDesc" value="${esc(g.desc)}" placeholder="예: 2인 저녁"></div>
+    <div class="field"><label>결제자</label>${segHTML('xPayer', b.members.map(m=>({v:m,t:m})), '나')}</div>
+    <p class="err" id="xErr"></p>
+    <div class="row"><button type="button" class="btn" id="again">다시 찍기</button><button type="submit" class="btn pri">저장</button></div></form>`, () => {
+    const getC = bindSeg('xCat'), getP = bindSeg('xPayer');
+    $('again').onclick = () => scanStart('biz');
+    $('fBizX').addEventListener('submit', e => { e.preventDefault();
+      const a = parseInt($('xAmt').value, 10);
+      if (!(a > 0)) { $('xErr').textContent = '금액을 1원 이상으로 입력해 주세요.'; return; }
+      const cat = getC() || '기타';
+      S.bizExp.push({ id:uid(), biz:b.id, date:$('xDate').value, cat, shop:$('xShop').value.trim(), desc:$('xDesc').value.trim(), payer:getP() || '나', amount:a, qty: cat === '주유' && r.qty ? r.qty : undefined, receipt:!!r.photo });
+      save(); closeSheet(); render(); toast(cat + ' 경비를 저장했어요'); });
   });
 }
 function carSheet(id){
@@ -521,36 +680,6 @@ function viewBiz(){
     <p class="note">출장 경비 양식(일자·요일·차수·구분·사용처·내역·결제자·결제수단·금액) 순서로 정리하고, 영수증 사진은 'No_일자_구분.jpg' 이름으로 모아 드려요.</p>
   </section>`;
 }
-/* 미리보기용 예시 영수증 — 찍을 때마다 다른 종류가 나옴 */
-let bizScanN = 0;
-function bizSamples(){
-  const t = ymd(new Date());
-  return [
-    {lines:[['','청주 고깃집'],['일시',t.slice(5)+' 19:12'],['삼겹살 2인분','28,000'],['공기밥 2','2,000'],['합계','30,000원']], r:{date:t,cat:'식대',shop:'청주 고깃집',desc:'2인 저녁',amount:30000}, why:'저녁 시간 · 2인분'},
-    {lines:[['','한국도로공사'],['영업소','청주IC'],['일시',t.slice(5)+' 08:41'],['차종','1종'],['통행료','7,800원']], r:{date:t,cat:'통행료',shop:'한국도로공사 청주IC',desc:'하행 · 공동',amount:7800}, why:'도로공사 영수증'},
-    {lines:[['','청주 시티호텔'],['체크인',t.slice(5)],['객실','스탠다드 1인'],['숙박','1박'],['결제금액','72,000원']], r:{date:t,cat:'숙박',shop:'청주 시티호텔',desc:'1박 · 1인실',amount:72000}, why:'호텔 · 1박'},
-    {lines:[['','SK 청주셀프주유소'],['일시',t.slice(5)+' 17:55'],['유종','휘발유'],['수량','38.40 L'],['합계','63,360원']], r:{date:t,cat:'주유',shop:'SK 청주셀프주유소',desc:'휘발유 · 공동',amount:63360,qty:38.4}, why:'주유소 · 휘발유'}
-  ];
-}
-function bizScanSheet(){
-  const b = bizNow(), smp = bizSamples()[bizScanN++ % 4], r = {...smp.r};
-  openSheet(`<h3>영수증 인식</h3>
-    <div class="shot"><div class="receipt">${smp.lines.map(l => l[0] ? `<div class="l" data-f="1"><span>${l[0]}</span><span>${l[1]}</span></div>` : `<div class="c"><b>${l[1]}</b></div><div class="hr"></div>`).join('')}</div><div class="scanline"></div></div>
-    <p id="bs" style="text-align:center;color:var(--muted);margin:0 0 12px">글자를 읽는 중…</p>
-    <div id="br" hidden>
-      <dl class="found"><dt>구분</dt><dd>${r.cat} <span class="chip">${smp.why}</span></dd><dt>사용처</dt><dd>${esc(r.shop)}</dd><dt>내역</dt><dd>${esc(r.desc)}</dd><dt>금액</dt><dd class="num">${won(r.amount)}</dd></dl>
-      <div class="field" style="margin-top:8px"><label>결제자</label>${segHTML('bPayer', b.members.map(m=>({v:m,t:m})), '나')}</div>
-      <div class="row"><button type="button" class="btn" id="bAgain">다시 찍기</button><button type="button" class="btn pri" id="bSave">저장</button></div>
-    </div>`, () => {
-    const getP = bindSeg('bPayer');
-    setTimeout(() => {
-      document.querySelectorAll('.receipt .l[data-f]').forEach(l=>l.classList.add('hit'));
-      $('bs').textContent = '자동으로 분류했어요. 결제자만 확인해 주세요.'; $('br').hidden = false;
-      $('bAgain').onclick = bizScanSheet;
-      $('bSave').onclick = () => { S.bizExp.push({id:uid(), biz:b.id, ...r, payer:getP()||'나', receipt:true}); save(); closeSheet(); render(); toast(r.cat+' 경비를 저장했어요'); };
-    }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 50 : 1600);
-  });
-}
 function bizExcelSheet(){
   const b = bizNow(), R = bizRows(b);
   const tsv = R.map(x=>[x.date, wd(x.date), b.name, x.cat, x.shop, x.desc, x.payer, '법인카드', x.amount].join('\t')).join('\n');
@@ -603,8 +732,8 @@ function bindView(){
   document.querySelectorAll('[data-del-cost]').forEach(b => b.onclick = () => { S.costs = S.costs.filter(x=>x.id!==b.dataset.delCost); save(); render(); toast('비용 기록을 삭제했어요'); });
   document.querySelectorAll('[data-edit-car]').forEach(b => b.onclick = () => carSheet(b.dataset.editCar));
   if ($('addCar')) $('addCar').onclick = proSheet;
-  if ($('openScan')) $('openScan').onclick = scanSheet;
-  if ($('bizScan')) $('bizScan').onclick = bizScanSheet;
+  if ($('openScan')) $('openScan').onclick = () => scanStart('car');
+  if ($('bizScan')) $('bizScan').onclick = () => scanStart('biz');
   if ($('bizExcel')) $('bizExcel').onclick = bizExcelSheet;
   if ($('bizEdit')) $('bizEdit').onclick = bizEditSheet;
   document.querySelectorAll('[data-del-biz]').forEach(x => x.onclick = () => { S.bizExp = S.bizExp.filter(e=>e.id!==x.dataset.delBiz); save(); render(); toast('경비를 삭제했어요'); });
