@@ -164,6 +164,33 @@ tr:last-child td{border-bottom:0}
 .raw summary{cursor:pointer;padding:2px 0}
 .raw pre{white-space:pre-wrap;word-break:break-all;font:11.5px/1.5 var(--mono);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;max-height:180px;overflow:auto;margin:6px 0 0}
 .found dd{margin:0;font-weight:700}
+/* 시작 로고(매번) + 첫 실행 환영 화면 */
+#splash{position:fixed;inset:0;z-index:60;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .35s ease,visibility .35s}
+#splash.out{opacity:0;visibility:hidden}
+#splash svg{width:96px;height:96px;animation:splashIn .5s ease-out both}
+#splash svg .bar{transform-origin:15.37px 54px;animation:logobar .7s .25s cubic-bezier(.2,.8,.2,1) both}
+#splash b{font:900 22px/1 var(--sans);letter-spacing:.04em;animation:splashIn .5s .15s ease-out both}
+#splash span{font:500 13px/1 var(--sans);color:var(--muted);letter-spacing:.14em;animation:splashIn .5s .3s ease-out both}
+@keyframes splashIn{from{opacity:0;transform:translateY(6px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes logobar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.welcome{position:fixed;inset:0;z-index:50;background:var(--bg);overflow-y:auto;display:flex;justify-content:center}
+.welcome .in{width:100%;max-width:460px;min-height:100%;display:flex;flex-direction:column;padding:calc(48px + env(safe-area-inset-top,0px)) 24px calc(24px + env(safe-area-inset-bottom,0px))}
+.welcome .mark{width:64px;height:64px}
+.welcome h1{font:900 34px/1.15 var(--sans);margin:22px 0 10px;letter-spacing:-.02em}
+.welcome h1 em{font-style:normal;color:var(--accent-text)}
+.welcome .lead{color:var(--muted);font-size:15.5px;margin:0 0 28px}
+.feat{display:flex;flex-direction:column;gap:12px;margin-bottom:auto}
+.feat div{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.feat i{flex:none;width:38px;height:38px;border-radius:11px;background:var(--accent);color:var(--ink);display:flex;align-items:center;justify-content:center;font:900 15px var(--sans);font-style:normal}
+.feat b{display:block;font-size:15px}
+.feat span{font-size:13px;color:var(--muted)}
+.welcome .cta{display:flex;flex-direction:column;gap:10px;margin-top:28px}
+.welcome .cta .btn{padding:15px;font-size:15.5px}
+.linkbtn{background:none;border:0;color:var(--muted);font-size:13px;padding:8px;text-decoration:underline;text-underline-offset:3px}
+.probadge{display:inline-block;font:800 10px/1 var(--mono);letter-spacing:.06em;background:var(--accent);color:var(--ink);padding:3px 5px;border-radius:4px;vertical-align:2px;margin-left:5px}
+#printArea{display:none}
+@media print{body>*:not(#printArea){display:none!important}#printArea{display:block!important;color:#000;background:#fff;font:12px/1.5 var(--sans);padding:10mm}#printArea table{border-collapse:collapse;width:100%}#printArea th,#printArea td{border:1px solid #999;padding:4px 6px;color:#000;background:#fff}#printArea h1{font-size:18px;margin:0 0 6px}}
+@media (prefers-reduced-motion: reduce){#splash svg,#splash svg .bar,#splash b,#splash span{animation:none}}
 @media (prefers-reduced-motion: no-preference){
   .scanline{animation:scan 1.6s ease-in-out infinite}
   @keyframes scan{from{top:0}90%{opacity:1}to{top:100%;opacity:0}}
@@ -173,6 +200,34 @@ tr:last-child td{border-bottom:0}
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true">
+  <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#1A1C20"/><path d="M32.72 42.58C41.98 42.58 48.63 36.8 48.63 27.15V22.39H33.13V28.68H40.36C40.26 32.61 37.57 35.06 32.79 35.06C27.33 35.06 24.13 31.01 24.13 23.97C24.13 16.98 27.5 12.98 32.76 12.98C36.33 12.98 38.76 14.75 39.58 17.74H48.24C47.35 10.53 40.92 5.46 32.62 5.46C22.99 5.46 15.37 12.28 15.37 24.09C15.37 35.52 22.38 42.58 32.72 42.58Z" fill="#EEF0F3"/><rect class="bar" x="15.37" y="50.75" width="33.26" height="7.8" fill="#B5E04B"/></svg>
+  <b>GORO Drive</b>
+  <span>GOROSOFT</span>
+</div>
+<script>
+/* 로고를 최소 1.1초 보여주고 사라짐 */
+(function(){var t0=Date.now(),done=false;
+  window.__hideSplash=function(){if(done)return;done=true;var el=document.getElementById('splash');
+    setTimeout(function(){el.classList.add('out');setTimeout(function(){el.remove()},400)},Math.max(0,1100-(Date.now()-t0)))};
+  setTimeout(window.__hideSplash,3000);})();
+</script>
+<div class="welcome" id="welcome" hidden><div class="in">
+  <svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#1A1C20"/><path d="M32.72 42.58C41.98 42.58 48.63 36.8 48.63 27.15V22.39H33.13V28.68H40.36C40.26 32.61 37.57 35.06 32.79 35.06C27.33 35.06 24.13 31.01 24.13 23.97C24.13 16.98 27.5 12.98 32.76 12.98C36.33 12.98 38.76 14.75 39.58 17.74H48.24C47.35 10.53 40.92 5.46 32.62 5.46C22.99 5.46 15.37 12.28 15.37 24.09C15.37 35.52 22.38 42.58 32.72 42.58Z" fill="#EEF0F3"/><rect x="15.37" y="50.75" width="33.26" height="7.8" fill="#B5E04B"/></svg>
+  <h1>내 차 기록,<br><em>찍으면 끝.</em></h1>
+  <p class="lead">운행·유지비·출장 경비를 한 곳에서 정리하는 GORO Drive예요.</p>
+  <div class="feat">
+    <div><i>찍</i><p style="margin:0"><b>영수증 찍으면 자동 입력</b><span>금액·날짜·주유량을 읽어서 채워 드려요.</span></p></div>
+    <div><i>출</i><p style="margin:0"><b>출장 경비 정산까지</b><span>회사 정산 양식 순서로 정리하고 엑셀로 옮겨요.</span></p></div>
+    <div><i>내</i><p style="margin:0"><b>기록은 내 폰에만</b><span>가입 없이 바로 쓰고, 서버로 보내지 않아요.</span></p></div>
+  </div>
+  <div class="cta">
+    <button type="button" class="btn pri" id="wStart">내 차 등록하고 시작하기</button>
+    <button type="button" class="btn" id="wDemo">예시로 먼저 둘러보기</button>
+    <button type="button" class="linkbtn" id="wLogin">고로소프트 계정으로 로그인</button>
+  </div>
+</div></div>
+<div id="printArea"></div>
 <div class="app">
   <header class="top">
     <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="12" fill="#1A1C20"/><path d="M32.72 42.58C41.98 42.58 48.63 36.8 48.63 27.15V22.39H33.13V28.68H40.36C40.26 32.61 37.57 35.06 32.79 35.06C27.33 35.06 24.13 31.01 24.13 23.97C24.13 16.98 27.5 12.98 32.76 12.98C36.33 12.98 38.76 14.75 39.58 17.74H48.24C47.35 10.53 40.92 5.46 32.62 5.46C22.99 5.46 15.37 12.28 15.37 24.09C15.37 35.52 22.38 42.58 32.72 42.58Z" fill="#EEF0F3"/><rect x="15.37" y="50.75" width="33.26" height="7.8" fill="#B5E04B"/></svg>
@@ -366,9 +421,9 @@ function viewReport(){
       <tr><td><b>합계</b></td><td></td><td></td><td></td><td class="n"><b>${total}</b></td></tr></tbody></table></div>` : '<p class="empty" style="padding:14px 0">표시할 운행 기록이 없어요.</p>'}
   </section>
   <section class="card">
-    <p class="h2">내보내기 <span class="pro">PRO</span></p>
-    <div class="row"><button type="button" class="btn pri" id="copyCsv">CSV 복사</button><button type="button" class="btn" disabled>PDF 저장</button></div>
-    <p class="note">CSV를 복사해 엑셀이나 구글 시트에 붙여 넣을 수 있어요. PDF 저장은 실제 앱에서 제공돼요. 보고서 내보내기는 프리미엄 기능(월 2,900원 예정)이에요.</p>
+    <p class="h2">내보내기 <span class="pro">PRO</span>${isPro ? '<span class="probadge">사용 중</span>' : ''}</p>
+    <div class="row"><button type="button" class="btn pri" id="copyCsv">CSV 복사</button><button type="button" class="btn" id="pdfBtn" ${isPro ? '' : 'disabled'}>PDF 저장</button></div>
+    <p class="note">${isPro ? 'PDF 저장을 누르면 인쇄 화면이 열려요. 공유 → "PDF로 저장"이나 "파일에 저장"을 고르면 돼요.' : 'CSV를 복사해 엑셀이나 구글 시트에 붙여 넣을 수 있어요. PDF 저장은 프리미엄 기능(월 2,900원 예정)이에요.'}</p>
     <textarea id="csvBox" readonly hidden style="width:100%;height:140px;margin-top:10px;font:12px var(--mono);background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px"></textarea>
   </section>`;
 }
@@ -377,10 +432,11 @@ function viewReport(){
 function viewCar(){
   return sampleBar() + S.cars.map(c => `
   <section class="card" style="${c.id===S.carId?'border-color:var(--accent)':''}">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><p class="h2" style="margin:0 0 2px">${c.id===S.carId?'사용 중인 차량':'차량'}</p><b style="font-size:20px">${esc(c.name)}</b></div><button type="button" class="btn" data-edit-car="${c.id}">수정</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><p class="h2" style="margin:0 0 2px">${c.id===S.carId?'사용 중인 차량':'차량'}</p><b style="font-size:20px">${esc(c.name)}</b></div><div class="row" style="flex:none">${c.id!==S.carId ? `<button type="button" class="btn pri" data-use-car="${c.id}">이 차로 보기</button><button type="button" class="btn" data-del-car="${c.id}" aria-label="차량 삭제">삭제</button>` : ''}<button type="button" class="btn" data-edit-car="${c.id}">수정</button></div></div>
     <div class="two" style="margin-top:14px"><div class="stat"><div class="k">차량번호</div><div class="v" style="font-size:18px">${esc(c.plate)}</div></div><div class="stat"><div class="k">연료</div><div class="v" style="font-size:18px">${(FUELS[c.fuel]||FUELS.gas).t}</div></div><div class="stat" style="grid-column:1/-1"><div class="k">현재 주행거리</div><div class="v" style="font-size:18px">${km(c.odo)}</div></div></div>
   </section>`).join('') + `
-  <section class="card"><p class="h2">차량 추가 <span class="pro">PRO</span></p><p class="note" style="margin:0 0 12px">무료 버전은 차량 1대를 관리할 수 있어요. 여러 대를 관리하려면 프리미엄이 필요해요.</p><button type="button" class="btn" id="addCar" style="width:100%">+ 차량 추가하기</button></section>
+  <section class="card"><p class="h2">차량 추가 <span class="pro">PRO</span>${isPro ? '<span class="probadge">사용 중</span>' : ''}</p><p class="note" style="margin:0 0 12px">${isPro ? '차량을 여러 대 등록하고 위에서 바꿔 가며 기록할 수 있어요.' : '무료 버전은 차량 1대를 관리할 수 있어요. 여러 대를 관리하려면 프리미엄이 필요해요.'}</p><button type="button" class="btn ${isPro ? 'pri' : ''}" id="addCar" style="width:100%">+ 차량 추가하기</button></section>
+  ${accountCard()}
   <section class="card"><p class="h2">내 기록 보관</p><p class="note" style="margin:0">모든 기록은 이 기기에만 저장되고 서버로 보내지 않아요.</p></section>`;
 }
 
@@ -411,7 +467,7 @@ function tripSheet(){
     $('fTrip').addEventListener('submit', e => { e.preventDefault();
       const dist = parseFloat($('tKm').value);
       if (!(dist > 0)) { $('tErr').textContent = '주행거리를 0보다 큰 숫자로 입력해 주세요.'; return; }
-      S.trips.push({id:uid(), date:$('tDate').value, from:$('tFrom').value.trim(), to:$('tTo').value.trim(), km:Math.round(dist*10)/10, purpose:get()||'업무'});
+      S.trips.push({id:uid(), car:S.carId, date:$('tDate').value, from:$('tFrom').value.trim(), to:$('tTo').value.trim(), km:Math.round(dist*10)/10, purpose:get()||'업무'});
       car().odo += dist; month = $('tDate').value.slice(0,7); save(); closeSheet(); render(); toast('운행 기록을 저장했어요'); });
   });
 }
@@ -433,7 +489,7 @@ function costSheet(pre){
       const a = parseInt($('cAmt').value, 10);
       if (!(a > 0)) { $('cErr').textContent = '금액을 1원 이상으로 입력해 주세요.'; return; }
       const cat = get()||'etc', qv = parseFloat($('cQty').value);
-      S.costs.push({id:uid(), date:$('cDate').value, cat, amount:a, memo:$('cMemo').value.trim(), qty: cat === 'fuel' && qv > 0 ? qv : undefined});
+      S.costs.push({id:uid(), car:S.carId, date:$('cDate').value, cat, amount:a, memo:$('cMemo').value.trim(), qty: cat === 'fuel' && qv > 0 ? qv : undefined});
       month = $('cDate').value.slice(0,7); save(); closeSheet(); render(); toast('비용 기록을 저장했어요'); });
   });
 }
@@ -708,11 +764,83 @@ function bizEditSheet(){
       const m=$('zM').value.split(',').map(x=>x.trim()).filter(Boolean); b.members = m.includes('나') ? m : ['나',...m]; save(); closeSheet(); render(); toast('출장 정보를 저장했어요'); });
   });
 }
+/* ── 계정·PRO: 고로소프트(사이트와 같은 Firebase) 로그인. 대표 계정(이메일 인증 완료)만 PRO 전체 개방 ──
+   ※ 출시 앱에서는 스토어 구독 + 서버 확인으로 바꿀 예정. 지금은 테스트용 화면 잠금 */
+const OWNER_EMAILS = ['cube5828@gorosoft.co.kr'];
+let account = null, fb = null;
+let isPro = (() => { try { return localStorage.getItem('gorodrive.pro') === '1'; } catch(_) { return false; } })();
+function setAccount(u){
+  account = u ? { email: u.email || '', verified: !!u.emailVerified } : null;
+  isPro = !!(account && account.verified && OWNER_EMAILS.includes(account.email.toLowerCase()));
+  try { localStorage.setItem('gorodrive.pro', isPro ? '1' : '0'); } catch(_){}
+  render();
+}
+function loadAuth(){
+  if (fb) return fb;
+  fb = Promise.all([import('/firebase-config.js?v=20261026b')]).then(([cfg]) =>
+    Promise.all([import(cfg.SDK + 'firebase-app.js'), import(cfg.SDK + 'firebase-auth.js')]).then(([appM, authM]) => {
+      const auth = authM.getAuth(appM.initializeApp(cfg.firebaseConfig)); auth.languageCode = 'ko';
+      authM.onAuthStateChanged(auth, setAccount);
+      return { auth, authM };
+    })).catch(e => { fb = null; throw e; });
+  return fb;
+}
+function loginSheet(){
+  openSheet(`<h3>고로소프트 계정 로그인</h3>
+    <p class="note" style="margin:0 0 14px">gorosoft.co.kr에서 가입한 계정으로 로그인해요. 앱 기록은 로그인과 상관없이 이 폰에만 저장돼요.</p>
+    <form id="fLogin">
+      <div class="field"><label for="lEmail">이메일</label><input id="lEmail" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="lPw">비밀번호</label><input id="lPw" type="password" autocomplete="current-password" required></div>
+      <p class="err" id="lErr"></p>
+      <div class="row"><button type="button" class="btn" id="cancel">취소</button><button type="submit" class="btn pri" id="lBtn">로그인</button></div>
+    </form>`, () => {
+    $('cancel').onclick = closeSheet;
+    $('fLogin').addEventListener('submit', e => { e.preventDefault();
+      const btn = $('lBtn'); btn.disabled = true; $('lErr').textContent = '';
+      loadAuth().then(({ auth, authM }) => authM.signInWithEmailAndPassword(auth, $('lEmail').value.trim(), $('lPw').value))
+        .then(cred => { closeSheet(); const u = cred.user;
+          toast(!u.emailVerified ? '이메일 인증이 아직 안 된 계정이에요' : OWNER_EMAILS.includes((u.email||'').toLowerCase()) ? '대표 계정 · PRO가 열렸어요' : '로그인했어요'); })
+        .catch(err => { const c = err && err.code; btn.disabled = false;
+          $('lErr').textContent = c === 'auth/too-many-requests' ? '시도가 너무 많아요. 잠시 후 다시 해 주세요.' : (c === 'auth/network-request-failed' || !c) ? '인터넷 연결을 확인해 주세요.' : '이메일 또는 비밀번호가 맞지 않아요.'; });
+    });
+  });
+}
+function logout(){ loadAuth().then(({ auth, authM }) => authM.signOut(auth)).then(() => toast('로그아웃했어요')).catch(() => {}); }
+function newCarSheet(){
+  openSheet(`<h3>차량 추가 <span class="probadge">PRO</span></h3><form id="fNew">
+    <div class="field"><label for="nName">차량명</label><input id="nName" maxlength="20" placeholder="예: 회사차 쏘나타" required></div>
+    <div class="field"><label for="nPlate">차량번호</label><input id="nPlate" maxlength="12" placeholder="예: 34나 5678" required></div>
+    <div class="field"><label>연료</label>${segHTML('nFuel', Object.entries(FUELS).map(([v,f])=>({v,t:f.t})), 'gas')}</div>
+    <div class="field"><label for="nOdo">현재 주행거리 (km)</label><input id="nOdo" type="number" inputmode="numeric" min="0" value="0" required></div>
+    <div class="row"><button type="button" class="btn" id="cancel">취소</button><button type="submit" class="btn pri">추가</button></div></form>`, () => {
+    const getF = bindSeg('nFuel'); $('cancel').onclick = closeSheet;
+    $('fNew').addEventListener('submit', e => { e.preventDefault();
+      const c = { id:uid(), name:$('nName').value.trim(), plate:$('nPlate').value.trim(), fuel:getF()||'gas', odo:Math.max(0, +$('nOdo').value || 0) };
+      S.cars.push(c); S.carId = c.id; save(); closeSheet(); render(); toast(c.name + '을(를) 추가했어요'); });
+  });
+}
+function printReport(){
+  const c = car(), rows = reportRows(), C = inMonth(S.costs).sort((a,b)=>a.date.localeCompare(b.date));
+  $('printArea').innerHTML = `<h1>${monthLabel()} 차량 운행기록부</h1><p>${esc(c.name)} · ${esc(c.plate)} · ${fuel().t} · ${onlyWork ? '업무 운행' : '전체 운행'}</p>
+    <table><thead><tr><th>일자</th><th>출발지</th><th>도착지</th><th>목적</th><th>거리(km)</th></tr></thead><tbody>${rows.map(t=>`<tr><td>${t.date}</td><td>${esc(t.from)}</td><td>${esc(t.to)}</td><td>${t.purpose}</td><td style="text-align:right">${t.km}</td></tr>`).join('')}
+    <tr><td colspan="4"><b>합계</b></td><td style="text-align:right"><b>${rows.reduce((s,t)=>s+t.km,0)}</b></td></tr></tbody></table>
+    <h1 style="margin-top:16px">비용 내역</h1><table><thead><tr><th>일자</th><th>항목</th><th>금액(원)</th><th>메모</th></tr></thead><tbody>${C.map(x=>`<tr><td>${x.date}</td><td>${catName(x.cat)}</td><td style="text-align:right">${x.amount.toLocaleString('ko-KR')}</td><td>${esc(x.memo||'')}</td></tr>`).join('')}
+    <tr><td colspan="2"><b>합계</b></td><td style="text-align:right"><b>${C.reduce((s,x)=>s+x.amount,0).toLocaleString('ko-KR')}</b></td><td></td></tr></tbody></table>
+    <p style="margin-top:12px;color:#666">GORO Drive · GOROSOFT</p>`;
+  setTimeout(() => window.print(), 50);
+}
+function accountCard(){
+  if (!account) return `<section class="card"><p class="h2">계정</p><p class="note" style="margin:0 0 12px">로그인하지 않아도 모든 기본 기능을 쓸 수 있어요.</p><button type="button" class="btn" id="loginBtn" style="width:100%">고로소프트 계정으로 로그인</button></section>`;
+  return `<section class="card"><p class="h2">계정 ${isPro ? '<span class="probadge">PRO · 대표 계정</span>' : ''}</p>
+    <p style="margin:0 0 4px;font-weight:700;word-break:break-all">${esc(account.email)}</p>
+    <p class="note" style="margin:0 0 12px">${!account.verified ? '이메일 인증이 아직 안 된 계정이에요.' : isPro ? '여러 차량, PDF 저장 등 PRO 기능이 모두 열려 있어요.' : '일반 계정이에요.'}</p>
+    <button type="button" class="btn" id="logoutBtn" style="width:100%">로그아웃</button></section>`;
+}
 const VIEWS = {home:viewHome, trips:viewTrips, costs:viewCosts, biz:viewBiz, report:viewReport, car:viewCar};
 
 function render(){
   const c = car();
-  $('carName').textContent = c.name; $('carSub').textContent = c.plate + ' · ' + fuel().t;
+  $('carName').innerHTML = esc(c.name) + (isPro ? '<span class="probadge">PRO</span>' : ''); $('carSub').textContent = (c.plate ? c.plate + ' · ' : '') + fuel().t;
   $('mLabel').textContent = monthLabel();
   $('main').innerHTML = VIEWS[tab]();
   $('main').scrollTop = 0;
@@ -731,7 +859,12 @@ function bindView(){
   document.querySelectorAll('[data-del-trip]').forEach(b => b.onclick = () => { const t = S.trips.find(x=>x.id===b.dataset.delTrip); S.trips = S.trips.filter(x=>x!==t); if (t) car().odo = Math.max(0, car().odo - t.km); save(); render(); toast('운행 기록을 삭제했어요'); });
   document.querySelectorAll('[data-del-cost]').forEach(b => b.onclick = () => { S.costs = S.costs.filter(x=>x.id!==b.dataset.delCost); save(); render(); toast('비용 기록을 삭제했어요'); });
   document.querySelectorAll('[data-edit-car]').forEach(b => b.onclick = () => carSheet(b.dataset.editCar));
-  if ($('addCar')) $('addCar').onclick = proSheet;
+  if ($('addCar')) $('addCar').onclick = () => isPro ? newCarSheet() : proSheet();
+  if ($('pdfBtn')) $('pdfBtn').onclick = () => isPro && printReport();
+  if ($('loginBtn')) $('loginBtn').onclick = loginSheet;
+  if ($('logoutBtn')) $('logoutBtn').onclick = logout;
+  document.querySelectorAll('[data-use-car]').forEach(b => b.onclick = () => { S.carId = b.dataset.useCar; save(); render(); toast(car().name + ' 기록을 보여 드려요'); });
+  document.querySelectorAll('[data-del-car]').forEach(b => b.onclick = () => { const c = S.cars.find(x=>x.id===b.dataset.delCar); if (!c || !confirmDel(b, c.name)) return; });
   if ($('openScan')) $('openScan').onclick = () => scanStart('car');
   if ($('bizScan')) $('bizScan').onclick = () => scanStart('biz');
   if ($('bizExcel')) $('bizExcel').onclick = bizExcelSheet;
@@ -752,7 +885,30 @@ $('fab').onclick = () => {
   if (tab === 'trips') return tripSheet();
   openSheet(`<h3>무엇을 기록할까요?</h3><div class="row"><button type="button" class="btn pri" id="pickTrip">운행 기록</button><button type="button" class="btn pri" id="pickCost">비용 기록</button></div>`, () => { $('pickTrip').onclick = tripSheet; $('pickCost').onclick = costSheet; });
 };
+/* 차량 삭제: 버튼을 한 번 더 눌러야 지워짐(실수 방지). 그 차의 기록도 같이 지움 */
+function confirmDel(btn, name){
+  if (btn.dataset.armed) { const id = btn.dataset.delCar;
+    S.cars = S.cars.filter(x => x.id !== id); S.trips = S.trips.filter(x => x.car !== id); S.costs = S.costs.filter(x => x.car !== id);
+    save(); render(); toast(name + '을(를) 삭제했어요'); return true; }
+  btn.dataset.armed = '1'; btn.textContent = '정말 삭제'; btn.style.color = 'var(--danger)'; btn.style.borderColor = 'var(--danger)';
+  setTimeout(() => { if (btn.isConnected){ delete btn.dataset.armed; btn.textContent = '삭제'; btn.style.color = ''; btn.style.borderColor = ''; } }, 3000);
+  return false;
+}
+/* 첫 실행: 환영 화면 */
+let welcomed = false; try { welcomed = localStorage.getItem('gorodrive.welcomed') === '1'; } catch(_){}
+function closeWelcome(){ $('welcome').hidden = true; try { localStorage.setItem('gorodrive.welcomed', '1'); } catch(_){} }
+if (!welcomed) $('welcome').hidden = false;
+$('wDemo').onclick = () => { closeWelcome(); tab = 'home'; render(); };
+$('wStart').onclick = () => {
+  closeWelcome();
+  S = {sample:false, cars:[{id:'c1', name:'내 차', plate:'', fuel:'gas', odo:0}], carId:'c1', trips:[], costs:[], biz:[{id:'b1', name:'새 출장', place:'', start:ymd(new Date()), end:ymd(new Date()), members:['나']}], bizExp:[], bizId:'b1'};
+  save(); tab = 'car'; render(); carSheet('c1');
+};
+$('wLogin').onclick = () => { closeWelcome(); tab = 'car'; render(); loginSheet(); };
 render();
+window.__hideSplash && window.__hideSplash();
+/* 예전에 로그인했으면 조용히 계정 상태 확인(오프라인이면 마지막 상태 유지) */
+loadAuth().catch(() => {});
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/gdtest/sw.js', { scope: '/gdtest/' }).catch(() => {});
 })();
 </script>
