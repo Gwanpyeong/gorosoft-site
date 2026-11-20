@@ -1,0 +1,17 @@
+{
+  "name": "GORO Drive 미리보기 · GOROSOFT",
+  "short_name": "GORO Drive",
+  "description": "GORO Drive(가칭) 출시 전 테스트용 미리보기입니다.",
+  "lang": "ko",
+  "start_url": "/gdtest/",
+  "scope": "/gdtest/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#121316",
+  "theme_color": "#121316",
+  "icons": [
+    { "src": "/gdtest/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/gdtest/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/gdtest/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

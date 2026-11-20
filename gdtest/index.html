@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GORO Drive 미리보기 | GOROSOFT</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#121316">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GORO Drive">
+<link rel="manifest" href="/gdtest/manifest.webmanifest">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/gdtest/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* 출시 전 테스트용 미리보기 — 검색에 노출되지 않게 noindex. 기록은 이 기기에만 저장됨 */
+[hidden]{display:none!important}
+html,body{margin:0;padding:0}
+img{max-width:100%}
+:root{
+  --bg:#121316; --panel:#1A1C20; --panel2:#202329; --line:#2B2E35; --text:#EEF0F3; --muted:#9AA1AD;
+  --accent:#B5E04B; --accent-text:#B5E04B; --ink:#121316; --danger:#FF8A80;
+  --c-fuel:#B5E04B; --c-toll:#4FD1C5; --c-park:#F6C453; --c-repair:#FF8A80; --c-ins:#A78BFA; --c-etc:#8A919C;
+  --sans:"Noto Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font:400 15px/1.55 var(--sans);word-break:keep-all;-webkit-text-size-adjust:100%}
+*{box-sizing:border-box}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+.app{max-width:460px;height:100%;margin:0 auto;display:flex;flex-direction:column;background:var(--bg);border-left:1px solid var(--line);border-right:1px solid var(--line)}
+@media (max-width:480px){.app{border:0}}
+.top{flex:none;padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+.logo{width:30px;height:30px;flex:none}
+.car{flex:1;min-width:0}
+.car b{display:block;font-size:16px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.car span{font-size:12.5px;color:var(--muted)}
+.month{display:flex;align-items:center;gap:2px;flex:none}
+.month button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--panel)}
+.month span{min-width:88px;text-align:center;font-weight:700;font-size:14px}
+
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-block:16px calc(96px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+.sample{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);background:var(--panel2);border:1px dashed var(--line);border-radius:10px;padding:9px 12px}
+.sample b{color:var(--text)}
+.sample button{margin-left:auto;flex:none;background:none;border:0;color:var(--accent-text);font-weight:700;font-size:13px;padding:2px 0}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.h2{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.02em;margin:0 0 10px}
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.stat.big{grid-column:1/-1;background:var(--accent);color:var(--ink);border-color:transparent}
+.stat .k{font-size:12.5px;opacity:.75}
+.stat .v{font-family:var(--mono);font-weight:700;font-size:22px;margin-top:2px;letter-spacing:-.02em}
+.stat.big .v{font-size:34px}
+.stat .s{font-size:12px;opacity:.7;margin-top:2px}
+
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:56px 1fr auto;align-items:center;gap:10px;font-size:13.5px}
+.track{height:10px;border-radius:5px;background:var(--panel2);overflow:hidden}
+.fill{height:100%;border-radius:5px}
+.bar .num{font-size:13px}
+.split{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--panel2);margin-top:4px}
+.legend{display:flex;gap:14px;font-size:12.5px;color:var(--muted);margin-top:8px;flex-wrap:wrap}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:0}
+
+.list{display:flex;flex-direction:column}
+.day{font-size:12.5px;color:var(--muted);font-weight:700;padding:12px 2px 6px}
+.item{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 12px 12px 14px;margin-bottom:8px}
+.ico{width:36px;height:36px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--panel2);font-weight:900;font-size:13px}
+.item .t{flex:1;min-width:0}
+.item .t b{display:block;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .t span{font-size:12.5px;color:var(--muted)}
+.item .r{text-align:right;flex:none}
+.item .r .num{font-weight:700}
+.chip{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.chip.work{border-color:transparent;background:var(--accent);color:var(--ink)}
+.del{background:none;border:0;color:var(--muted);font-size:18px;width:28px;height:28px;border-radius:6px;flex:none}
+.del:hover{color:var(--danger)}
+.empty{text-align:center;color:var(--muted);padding:40px 10px;font-size:14px}
+
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:11px 14px;font-weight:700;font-size:14px}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--ink)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row .btn{flex:1}
+.pro{display:inline-block;font:700 10.5px/1 var(--mono);letter-spacing:.06em;background:var(--text);color:var(--bg);padding:3px 6px;border-radius:4px;vertical-align:2px;margin-left:6px}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:left}
+td.num,th.n,td.n{white-space:nowrap}
+th{background:var(--panel2);color:var(--muted);font-weight:700}
+td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:0}
+.note{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);font-weight:700;font-size:13.5px;padding:10px 16px;border-radius:999px;z-index:40;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;pointer-events:none}
+.tabs nav{pointer-events:auto;width:100%;max-width:460px;display:grid;grid-template-columns:repeat(6,1fr);background:var(--panel);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.tabs button{background:none;border:0;padding:9px 0 10px;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;color:var(--muted)}
+.tabs button svg{width:22px;height:22px}
+.tabs button[aria-current="page"]{color:var(--text)}
+.tabs button[aria-current="page"] svg{color:var(--accent-text)}
+.fab{position:fixed;z-index:21;bottom:calc(76px + env(safe-area-inset-bottom,0px));right:max(16px,calc(50% - 214px));width:56px;height:56px;border-radius:18px;border:0;background:var(--accent);color:var(--ink);font-size:30px;font-weight:400;box-shadow:0 10px 24px rgba(0,0,0,.35)}
+
+.scrim{position:fixed;inset:0;z-index:30;background:rgba(5,8,12,.55);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:460px;background:var(--panel);border-radius:20px 20px 0 0;padding:10px 18px calc(20px + env(safe-area-inset-bottom,0px));max-height:88%;overflow-y:auto}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+.sheet h3{margin:0 0 14px;font-size:18px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{font-size:12.5px;color:var(--muted);font-weight:700}
+.field input,.field select{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-size:16px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:7px 12px;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--ink);font-weight:700}
+.err{color:var(--danger);font-size:13px;min-height:1.2em;margin:2px 0 8px}
+.confirm{display:flex;align-items:center;gap:8px;font-size:13px}
+.scanbtn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--panel);border:1px dashed var(--accent-text);border-radius:14px;padding:14px}
+.scanbtn .cam{width:40px;height:40px;border-radius:12px;background:var(--accent);color:var(--ink);display:flex;align-items:center;justify-content:center;flex:none}
+.scanbtn b{display:block;font-size:15px}
+.scanbtn span{font-size:12.5px;color:var(--muted)}
+.soon{display:inline-block;font:700 10.5px/1 var(--sans);background:var(--accent);color:var(--ink);padding:3px 6px;border-radius:4px;vertical-align:2px;margin-left:6px}
+.shot{position:relative;margin:4px auto 14px;width:260px;max-width:100%;background:#2A2D33;border-radius:16px;padding:18px 0;overflow:hidden}
+.receipt{width:210px;margin:0 auto;background:#FAFAF6;color:#222;font:12px/1.65 var(--mono);padding:14px 14px 18px;transform:rotate(-1.5deg);box-shadow:0 8px 20px rgba(0,0,0,.35)}
+.receipt .c{text-align:center}
+.receipt .hr{border-top:1px dashed #999;margin:6px 0}
+.receipt .l{display:flex;justify-content:space-between;border-radius:3px;padding:0 3px;margin:0 -3px;transition:background .3s}
+.receipt .l.hit{background:rgba(181,224,75,.55)}
+.scanline{position:absolute;left:0;right:0;height:3px;background:var(--accent);box-shadow:0 0 14px 4px rgba(181,224,75,.6);top:0}
+.found{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;margin:0 0 6px}
+.found dt{color:var(--muted)}
+.trip{background:var(--panel);border:1px solid var(--accent-text);border-radius:14px;padding:16px}
+.trip .t1{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.trip h4{margin:0;font-size:17px}
+.trip .meta{font-size:12.5px;color:var(--muted);margin-top:2px}
+.trip .sum{font:700 26px var(--mono);margin:12px 0 2px;letter-spacing:-.02em}
+.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
+.cats div{background:var(--panel2);border-radius:8px;padding:7px 8px;font-size:11.5px;color:var(--muted)}
+.cats b{display:block;font:700 13px var(--mono);color:var(--text)}
+.payers{display:flex;gap:8px;margin-top:10px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.payers b{color:var(--text);font-family:var(--mono)}
+.bigscan{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--accent);color:var(--ink);border:0;border-radius:14px;padding:16px;font-weight:900;font-size:16px}
+.bigscan svg{width:24px;height:24px}
+.rcpt{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.warn{color:var(--danger);font-size:12px;font-weight:700}
+.prev table{font-size:11.5px}
+.prev td,.prev th{padding:6px;white-space:nowrap}
+.found dd{margin:0;font-weight:700}
+@media (prefers-reduced-motion: no-preference){
+  .scanline{animation:scan 1.6s ease-in-out 1 forwards}
+  @keyframes scan{from{top:0}90%{opacity:1}to{top:100%;opacity:0}}
+  .sheet{animation:up .22s cubic-bezier(.2,.8,.2,1)} .fill{transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  @keyframes up{from{transform:translateY(30px);opacity:.4}}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="12" fill="#1A1C20"/><path d="M32.72 42.58C41.98 42.58 48.63 36.8 48.63 27.15V22.39H33.13V28.68H40.36C40.26 32.61 37.57 35.06 32.79 35.06C27.33 35.06 24.13 31.01 24.13 23.97C24.13 16.98 27.5 12.98 32.76 12.98C36.33 12.98 38.76 14.75 39.58 17.74H48.24C47.35 10.53 40.92 5.46 32.62 5.46C22.99 5.46 15.37 12.28 15.37 24.09C15.37 35.52 22.38 42.58 32.72 42.58Z" fill="#EEF0F3"/><rect x="15.37" y="50.75" width="33.26" height="7.8" fill="#B5E04B"/></svg>
+    <div class="car"><b id="carName">-</b><span id="carSub">-</span></div>
+    <div class="month" aria-label="달 선택"><button type="button" id="mPrev" aria-label="이전 달">‹</button><span id="mLabel" class="num"></span><button type="button" id="mNext" aria-label="다음 달">›</button></div>
+  </header>
+  <main class="main" id="main" aria-live="polite"></main>
+</div>
+<button type="button" class="fab" id="fab" aria-label="기록 추가" hidden>+</button>
+<div class="tabs"><nav id="tabs" aria-label="메뉴">
+  <button type="button" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>분석</button>
+  <button type="button" data-tab="trips"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.5"/></svg>운행</button>
+  <button type="button" data-tab="costs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg>비용</button>
+  <button type="button" data-tab="biz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>출장</button>
+  <button type="button" data-tab="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>보고서</button>
+  <button type="button" data-tab="car"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16h14v-4l-2-5H7l-2 5z"/><circle cx="8" cy="17" r="1.6"/><circle cx="16" cy="17" r="1.6"/></svg>차량</button>
+</nav></div>
+<div id="sheetHost"></div>
+
+<script>
+(function(){
+const CATS = [
+  {id:'fuel',name:'주유비',short:'주유',color:'var(--c-fuel)'},
+  {id:'toll',name:'통행료',short:'통행',color:'var(--c-toll)'},
+  {id:'park',name:'주차비',short:'주차',color:'var(--c-park)'},
+  {id:'repair',name:'정비비',short:'정비',color:'var(--c-repair)'},
+  {id:'ins',name:'보험료',short:'보험',color:'var(--c-ins)'},
+  {id:'etc',name:'기타',short:'기타',color:'var(--c-etc)'}
+];
+const PURPOSE = ['업무','출퇴근','개인'];
+const FUELS = {
+  gas:   {t:'휘발유', unit:'L',   cost:'주유비',     short:'주유', verb:'주유량'},
+  diesel:{t:'경유',   unit:'L',   cost:'주유비',     short:'주유', verb:'주유량'},
+  ev:    {t:'전기',   unit:'kWh', cost:'충전비',     short:'충전', verb:'충전량'},
+  h2:    {t:'수소',   unit:'kg',  cost:'수소충전비', short:'수소', verb:'충전량'}
+};
+const KEY = 'gorodrive.v1';
+const $ = (id) => document.getElementById(id);
+const won = (n) => '₩' + Math.round(n).toLocaleString('ko-KR');
+const km = (n) => Math.round(n).toLocaleString('ko-KR') + ' km';
+const pad = (n) => String(n).padStart(2,'0');
+const ymd = (d) => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Math.random().toString(36).slice(2,9);
+
+/* ── 예시 데이터: 이번 달과 지난달 ── */
+function sample(){
+  const now = new Date(); const y = now.getFullYear(), m = now.getMonth(), today = now.getDate();
+  const d = (mo, day) => ymd(new Date(y, mo, Math.min(day, mo === m ? today : 28)));
+  const T = [], C = [];
+  const trips = [
+    [1,'집','판교 사무실',23,'출퇴근'],[2,'판교 사무실','수원 고객사',31,'업무'],[2,'수원 고객사','판교 사무실',31,'업무'],
+    [5,'집','판교 사무실',23,'출퇴근'],[7,'판교 사무실','청주 사업장',118,'업무'],[7,'청주 사업장','집',104,'업무'],
+    [10,'집','마트',6,'개인'],[13,'집','판교 사무실',23,'출퇴근'],[15,'판교 사무실','용인 고객사',27,'업무'],
+    [18,'집','부모님 댁',42,'개인'],[21,'집','판교 사무실',23,'출퇴근'],[23,'판교 사무실','평택 고객사',58,'업무'],
+    [24,'평택 고객사','집',49,'업무'],[27,'집','판교 사무실',23,'출퇴근']
+  ];
+  trips.forEach(([day,f,t,dist,p]) => { if (day <= today) T.push({id:uid(),date:d(m,day),from:f,to:t,km:dist,purpose:p}); });
+  [[3,'집','판교 사무실',23,'출퇴근'],[9,'판교 사무실','이천 고객사',64,'업무'],[9,'이천 고객사','집',51,'업무'],[16,'집','공항',71,'개인'],[22,'판교 사무실','안산 고객사',47,'업무']]
+    .forEach(([day,f,t,dist,p]) => T.push({id:uid(),date:d(m-1,day),from:f,to:t,km:dist,purpose:p}));
+  const q = (c,a) => c === 'fuel' ? Math.round(a/1650*10)/10 : undefined;
+  const costs = [[2,'fuel',36000,'셀프 주유'],[7,'toll',8400,'청주 왕복'],[8,'park',12000,'청주 사업장'],[15,'repair',89000,'타이어 위치 교환'],
+    [15,'park',3000,''],[19,'etc',15000,'손세차'],[20,'fuel',38000,''],[23,'toll',4600,'평택']];
+  costs.forEach(([day,c,a,memo]) => { if (day <= today) C.push({id:uid(),date:d(m,day),cat:c,amount:a,memo,qty:q(c,a)}); });
+  [[4,'fuel',34000,''],[9,'toll',5200,''],[12,'ins',684000,'자동차보험 갱신'],[22,'park',6000,'']]
+    .forEach(([day,c,a,memo]) => C.push({id:uid(),date:d(m-1,day),cat:c,amount:a,memo,qty:q(c,a)}));
+  const total = T.reduce((s,t)=>s+t.km,0);
+  const bd = (off) => ymd(new Date(y, m, Math.max(1, today - 3 + off)));
+  const E = (off,cat,shop,desc,payer,amount,qty) => ({id:uid(), biz:'b1', date:bd(off), cat, shop, desc, payer, amount, qty, receipt:true});
+  const biz = [{id:'b1', name:'1차 청주 출장', place:'청주 고객사 사업장', start:bd(0), end:bd(3), members:['나','김OO']}];
+  const bizExp = [
+    E(0,'숙박','트립닷컴(청주 호텔)','3박 일괄 결제 · 1인실','김OO',213581),
+    E(0,'숙박','트립닷컴(청주 호텔)','3박 일괄 결제 · 1인실','나',206975),
+    E(0,'주유','GS칼텍스 용인주유소','휘발유 · 공동','나',61200,37.1),
+    E(0,'통행료','한국도로공사','하행 · 공동','나',7800),
+    E(0,'식대','청주 한식당','2인 저녁','김OO',34000),
+    E(1,'식대','김밥천국 청주점','2인 아침','나',13000),
+    E(1,'식대','청주 칼국수','2인 점심','나',18000)
+  ];
+  return {sample:true, cars:[{id:'c1',name:'아반떼',plate:'12가 3456',fuel:'gas',odo:48210+total}], carId:'c1', trips:T, costs:C, biz, bizExp, bizId:'b1'};
+}
+function load(){ try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.cars) return s; } catch(_){} return sample(); }
+let S = load();
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(_){} }
+
+const now = new Date();
+let month = now.getFullYear()+'-'+pad(now.getMonth()+1);
+let tab = 'home';
+
+const car = () => S.cars.find(c => c.id === S.carId) || S.cars[0];
+const fuel = () => FUELS[car().fuel] || FUELS.gas;
+const catName = (id) => id === 'fuel' ? fuel().cost : (CATS.find(c=>c.id===id) || CATS[5]).name;
+const catShort = (id) => id === 'fuel' ? fuel().short : (CATS.find(c=>c.id===id) || CATS[5]).short;
+const catColor = (id) => (CATS.find(c=>c.id===id) || CATS[5]).color;
+const qtyText = (q) => (Math.round(q*10)/10).toLocaleString('ko-KR') + ' ' + fuel().unit;
+const inMonth = (arr) => arr.filter(x => x.date.startsWith(month) && (!x.car || x.car === S.carId)).sort((a,b)=>b.date.localeCompare(a.date));
+function shiftMonth(n){ const [y,m] = month.split('-').map(Number); const d = new Date(y, m-1+n, 1); month = d.getFullYear()+'-'+pad(d.getMonth()+1); render(); }
+const monthLabel = () => { const [y,m] = month.split('-'); return y+'.'+m; };
+const dayLabel = (s) => { const d = new Date(s+'T00:00'); return (d.getMonth()+1)+'월 '+d.getDate()+'일 ('+'일월화수목금토'[d.getDay()]+')'; };
+
+function toast(msg){ const t = document.createElement('div'); t.className='toast'; t.setAttribute('role','status'); t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 1800); }
+
+function sampleBar(){
+  if (!S.sample) return '';
+  return '<div class="sample" id="sampleBar"><span><b>예시 데이터</b>로 채워져 있어요. 직접 기록해 보세요.</span><button type="button" id="clearSample">예시 지우기</button></div>';
+}
+
+/* ── 분석 ── */
+function viewHome(){
+  const T = inMonth(S.trips), C = inMonth(S.costs);
+  const dist = T.reduce((s,t)=>s+t.km,0), spend = C.reduce((s,c)=>s+c.amount,0);
+  const work = T.filter(t=>t.purpose==='업무').reduce((s,t)=>s+t.km,0);
+  const byCat = CATS.map(c => ({...c, name: catName(c.id), sum: C.filter(x=>x.cat===c.id).reduce((s,x)=>s+x.amount,0)})).filter(c=>c.sum>0).sort((a,b)=>b.sum-a.sum);
+  const qty = C.filter(x=>x.cat==='fuel' && x.qty>0).reduce((s,x)=>s+x.qty,0), F = fuel();
+  const max = byCat.length ? byCat[0].sum : 1;
+  const perKm = dist ? spend/dist : 0;
+  const byP = PURPOSE.map(p => ({p, v:T.filter(t=>t.purpose===p).reduce((s,t)=>s+t.km,0)}));
+  const pc = {'업무':'var(--accent)','출퇴근':'var(--c-toll)','개인':'var(--c-etc)'};
+  return sampleBar() + `
+  <div class="hero">
+    <div class="stat big"><div class="k">${monthLabel()} 총 지출</div><div class="v">${won(spend)}</div><div class="s">비용 기록 ${C.length}건</div></div>
+    <div class="stat"><div class="k">총 운행거리</div><div class="v">${km(dist)}</div><div class="s">운행 ${T.length}회</div></div>
+    <div class="stat"><div class="k">1km당 비용</div><div class="v">${dist ? won(perKm) : '-'}</div><div class="s">지출 ÷ 운행거리</div></div>
+    <div class="stat"><div class="k">${F.t} ${F.unit === 'L' ? '연비' : '효율'}</div><div class="v">${qty && dist ? (Math.round(dist/qty*10)/10) : '-'}<span style="font-size:13px"> km/${F.unit}</span></div><div class="s">운행거리 ÷ ${F.verb}</div></div>
+    <div class="stat"><div class="k">${F.verb}</div><div class="v">${qty ? qtyText(qty) : '-'}</div><div class="s">${F.cost} 기록 기준</div></div>
+  </div>
+  <section class="card"><p class="h2">항목별 비용</p>
+    ${byCat.length ? '<div class="bars">' + byCat.map(c => `<div class="bar"><span>${c.name}</span><div class="track"><div class="fill" style="width:${Math.max(3,c.sum/max*100)}%;background:${c.color}"></div></div><span class="num">${won(c.sum)}</span></div>`).join('') + '</div>' : '<p class="empty" style="padding:14px 0">이번 달 비용 기록이 없어요.</p>'}
+  </section>
+  <section class="card"><p class="h2">운행 목적</p>
+    ${dist ? `<div class="split">${byP.filter(x=>x.v).map(x=>`<div style="width:${x.v/dist*100}%;background:${pc[x.p]}"></div>`).join('')}</div>
+    <div class="legend">${byP.map(x=>`<span><i class="dot" style="background:${pc[x.p]}"></i>${x.p} <b class="num">${Math.round(x.v/dist*100)}%</b> · ${km(x.v)}</span>`).join('')}</div>
+    <p class="note">업무 운행 ${km(work)} · 업무용 운행기록부는 보고서 탭에서 만들 수 있어요.</p>` : '<p class="empty" style="padding:14px 0">이번 달 운행 기록이 없어요.</p>'}
+  </section>`;
+}
+
+/* ── 운행 ── */
+function groupByDay(items, row){
+  if (!items.length) return '';
+  let out = '', last = '';
+  items.forEach(x => { if (x.date !== last){ out += `<p class="day">${dayLabel(x.date)}</p>`; last = x.date; } out += row(x); });
+  return '<div class="list">' + out + '</div>';
+}
+function viewTrips(){
+  const T = inMonth(S.trips);
+  const head = `<div class="card" style="display:flex;justify-content:space-between;align-items:center"><div><p class="h2" style="margin:0">${monthLabel()} 운행</p><b class="num" style="font-size:20px">${km(T.reduce((s,t)=>s+t.km,0))}</b></div><span class="chip">${T.length}회</span></div>`;
+  return sampleBar() + head + (T.length ? groupByDay(T, t => `
+    <div class="item"><div class="ico" style="color:var(--accent-text)">${t.purpose[0]}</div>
+      <div class="t"><b>${esc(t.from)} → ${esc(t.to)}</b><span><span class="chip ${t.purpose==='업무'?'work':''}">${t.purpose}</span></span></div>
+      <div class="r"><span class="num">${km(t.km)}</span></div>
+      <button type="button" class="del" data-del-trip="${t.id}" aria-label="이 운행 기록 삭제">×</button></div>`)
+    : '<p class="empty">이 달에는 운행 기록이 없어요.<br>오른쪽 아래 + 버튼으로 추가해 보세요.</p>');
+}
+
+/* ── 비용 ── */
+function viewCosts(){
+  const C = inMonth(S.costs);
+  const head = `<div class="card" style="display:flex;justify-content:space-between;align-items:center"><div><p class="h2" style="margin:0">${monthLabel()} 지출</p><b class="num" style="font-size:20px">${won(C.reduce((s,c)=>s+c.amount,0))}</b></div><span class="chip">${C.length}건</span></div>`;
+  const scan = `<button type="button" class="scanbtn" id="openScan"><span class="cam"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span><b>영수증 찍어서 입력<span class="soon">NEW</span></b><span>금액·날짜·${fuel().verb}을 자동으로 채워 드려요</span></span></button>`;
+  return sampleBar() + head + scan + (C.length ? groupByDay(C, c => { const sub = [c.qty ? qtyText(c.qty) : '', c.memo || ''].filter(Boolean).join(' · '); return `
+    <div class="item"><div class="ico" style="color:${catColor(c.cat)}">${catShort(c.cat)}</div>
+      <div class="t"><b>${catName(c.cat)}</b><span>${esc(sub || ' ')}</span></div>
+      <div class="r"><span class="num">${won(c.amount)}</span></div>
+      <button type="button" class="del" data-del-cost="${c.id}" aria-label="이 비용 기록 삭제">×</button></div>`; })
+    : '<p class="empty">이 달에는 비용 기록이 없어요.<br>오른쪽 아래 + 버튼으로 추가해 보세요.</p>');
+}
+
+/* ── 보고서 ── */
+let onlyWork = true;
+function reportRows(){ return inMonth(S.trips).filter(t => !onlyWork || t.purpose==='업무').sort((a,b)=>a.date.localeCompare(b.date)); }
+function csvText(){
+  const c = car(), rows = reportRows(), C = inMonth(S.costs).sort((a,b)=>a.date.localeCompare(b.date));
+  const q = (v) => '"' + String(v).replace(/"/g,'""') + '"';
+  const out = [['차량',c.name,'차량번호',c.plate,'연료',fuel().t,'기간',monthLabel()].map(q).join(','), '', ['일자','출발지','도착지','운행 목적','주행거리(km)'].map(q).join(',')];
+  rows.forEach(t => out.push([t.date,t.from,t.to,t.purpose,t.km].map(q).join(',')));
+  out.push(['합계','','','',rows.reduce((s,t)=>s+t.km,0)].map(q).join(','), '', ['일자','항목','금액(원)',fuel().verb+'('+fuel().unit+')','메모'].map(q).join(','));
+  C.forEach(x => out.push([x.date,catName(x.cat),x.amount,x.qty||'',x.memo||''].map(q).join(',')));
+  out.push(['합계','',C.reduce((s,x)=>s+x.amount,0),'',''].map(q).join(','));
+  return out.join('\n');
+}
+function viewReport(){
+  const c = car(), rows = reportRows(), C = inMonth(S.costs);
+  const total = rows.reduce((s,t)=>s+t.km,0);
+  return sampleBar() + `
+  <section class="card">
+    <p class="h2">${monthLabel()} 운행기록부</p>
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13.5px;margin-bottom:10px"><span><b>${esc(c.name)}</b> · ${esc(c.plate)}</span><span class="num">${km(total)} · ${won(C.reduce((s,x)=>s+x.amount,0))}</span></div>
+    <div class="seg" style="margin-bottom:12px"><button type="button" id="rWork" aria-pressed="${onlyWork}">업무 운행만</button><button type="button" id="rAll" aria-pressed="${!onlyWork}">전체 운행</button></div>
+    ${rows.length ? `<div class="tablewrap"><table><thead><tr><th>일자</th><th>출발지</th><th>도착지</th><th>목적</th><th class="n">거리(km)</th></tr></thead><tbody>
+      ${rows.map(t=>`<tr><td class="num">${t.date.slice(5).replace('-','.')}</td><td>${esc(t.from)}</td><td>${esc(t.to)}</td><td>${t.purpose}</td><td class="n">${t.km}</td></tr>`).join('')}
+      <tr><td><b>합계</b></td><td></td><td></td><td></td><td class="n"><b>${total}</b></td></tr></tbody></table></div>` : '<p class="empty" style="padding:14px 0">표시할 운행 기록이 없어요.</p>'}
+  </section>
+  <section class="card">
+    <p class="h2">내보내기 <span class="pro">PRO</span></p>
+    <div class="row"><button type="button" class="btn pri" id="copyCsv">CSV 복사</button><button type="button" class="btn" disabled>PDF 저장</button></div>
+    <p class="note">CSV를 복사해 엑셀이나 구글 시트에 붙여 넣을 수 있어요. PDF 저장은 실제 앱에서 제공돼요. 보고서 내보내기는 프리미엄 기능(월 2,900원 예정)이에요.</p>
+    <textarea id="csvBox" readonly hidden style="width:100%;height:140px;margin-top:10px;font:12px var(--mono);background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px"></textarea>
+  </section>`;
+}
+
+/* ── 차량 ── */
+function viewCar(){
+  return sampleBar() + S.cars.map(c => `
+  <section class="card" style="${c.id===S.carId?'border-color:var(--accent)':''}">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><p class="h2" style="margin:0 0 2px">${c.id===S.carId?'사용 중인 차량':'차량'}</p><b style="font-size:20px">${esc(c.name)}</b></div><button type="button" class="btn" data-edit-car="${c.id}">수정</button></div>
+    <div class="two" style="margin-top:14px"><div class="stat"><div class="k">차량번호</div><div class="v" style="font-size:18px">${esc(c.plate)}</div></div><div class="stat"><div class="k">연료</div><div class="v" style="font-size:18px">${(FUELS[c.fuel]||FUELS.gas).t}</div></div><div class="stat" style="grid-column:1/-1"><div class="k">현재 주행거리</div><div class="v" style="font-size:18px">${km(c.odo)}</div></div></div>
+  </section>`).join('') + `
+  <section class="card"><p class="h2">차량 추가 <span class="pro">PRO</span></p><p class="note" style="margin:0 0 12px">무료 버전은 차량 1대를 관리할 수 있어요. 여러 대를 관리하려면 프리미엄이 필요해요.</p><button type="button" class="btn" id="addCar" style="width:100%">+ 차량 추가하기</button></section>
+  <section class="card"><p class="h2">내 기록 보관</p><p class="note" style="margin:0">모든 기록은 이 기기에만 저장되고 서버로 보내지 않아요.</p></section>`;
+}
+
+/* ── 입력 시트 ── */
+function openSheet(html, onMount){
+  const host = $('sheetHost');
+  host.innerHTML = `<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div></div>`;
+  $('scrim').addEventListener('click', e => { if (e.target.id === 'scrim') closeSheet(); });
+  onMount && onMount();
+}
+function closeSheet(){ $('sheetHost').innerHTML = ''; }
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('scrim')) closeSheet(); });
+
+function defaultDate(){ const t = ymd(new Date()); return t.startsWith(month) ? t : month + '-01'; }
+function segHTML(id, options, value){ return `<div class="seg" id="${id}">${options.map(o=>`<button type="button" data-v="${o.v}" aria-pressed="${o.v===value}">${o.t}</button>`).join('')}</div>`; }
+function bindSeg(id){ const el = $(id); el.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; el.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', x===b)); }); return () => (el.querySelector('[aria-pressed="true"]')||{}).dataset?.v; }
+
+function tripSheet(){
+  openSheet(`<h3>운행 기록</h3><form id="fTrip">
+    <div class="field"><label for="tDate">날짜</label><input id="tDate" type="date" value="${defaultDate()}" required></div>
+    <div class="two"><div class="field"><label for="tFrom">출발지</label><input id="tFrom" placeholder="예: 집" required></div><div class="field"><label for="tTo">도착지</label><input id="tTo" placeholder="예: 고객사" required></div></div>
+    <div class="field"><label for="tKm">주행거리 (km)</label><input id="tKm" type="number" inputmode="decimal" min="0.1" step="0.1" placeholder="예: 23" required></div>
+    <div class="field"><label>운행 목적</label>${segHTML('tPurpose', PURPOSE.map(p=>({v:p,t:p})), '업무')}</div>
+    <p class="err" id="tErr"></p>
+    <div class="row"><button type="button" class="btn" id="cancel">취소</button><button type="submit" class="btn pri">저장</button></div></form>`, () => {
+    const get = bindSeg('tPurpose');
+    $('cancel').onclick = closeSheet;
+    $('fTrip').addEventListener('submit', e => { e.preventDefault();
+      const dist = parseFloat($('tKm').value);
+      if (!(dist > 0)) { $('tErr').textContent = '주행거리를 0보다 큰 숫자로 입력해 주세요.'; return; }
+      S.trips.push({id:uid(), date:$('tDate').value, from:$('tFrom').value.trim(), to:$('tTo').value.trim(), km:Math.round(dist*10)/10, purpose:get()||'업무'});
+      car().odo += dist; month = $('tDate').value.slice(0,7); save(); closeSheet(); render(); toast('운행 기록을 저장했어요'); });
+  });
+}
+function costSheet(pre){
+  pre = pre || {};
+  openSheet(`<h3>비용 기록</h3>${pre.amount ? '' : '<button type="button" class="scanbtn" id="sheetScan" style="margin-bottom:14px"><span class="cam"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span><b>영수증 찍어서 입력<span class="soon">NEW</span></b><span>찍으면 자동으로 채워져요</span></span></button>'}<form id="fCost">
+    <div class="field"><label>항목</label>${segHTML('cCat', CATS.map(c=>({v:c.id,t:catName(c.id)})), pre.cat || 'fuel')}</div>
+    <div class="two"><div class="field"><label for="cDate">날짜</label><input id="cDate" type="date" value="${pre.date || defaultDate()}" required></div><div class="field"><label for="cAmt">금액 (원)</label><input id="cAmt" type="number" inputmode="numeric" min="1" step="1" placeholder="예: 65000" value="${pre.amount || ''}" required></div></div>
+    <div class="field" id="qtyField"><label for="cQty">${fuel().verb} (${fuel().unit}, 선택)</label><input id="cQty" type="number" inputmode="decimal" min="0" step="0.01" placeholder="입력하면 ${fuel().unit === 'L' ? '연비' : '효율'}를 계산해 드려요" value="${pre.qty || ''}"></div>
+    <div class="field"><label for="cMemo">메모 (선택)</label><input id="cMemo" maxlength="40" placeholder="예: 타이어 교체" value="${esc(pre.memo || '')}"></div>
+    <p class="err" id="cErr"></p>
+    <div class="row"><button type="button" class="btn" id="cancel">취소</button><button type="submit" class="btn pri">저장</button></div></form>`, () => {
+    const get = bindSeg('cCat');
+    const syncQty = () => { $('qtyField').hidden = (get() || 'fuel') !== 'fuel'; };
+    $('cCat').addEventListener('click', () => setTimeout(syncQty)); syncQty();
+    if ($('sheetScan')) $('sheetScan').onclick = scanSheet;
+    $('cancel').onclick = closeSheet;
+    $('fCost').addEventListener('submit', e => { e.preventDefault();
+      const a = parseInt($('cAmt').value, 10);
+      if (!(a > 0)) { $('cErr').textContent = '금액을 1원 이상으로 입력해 주세요.'; return; }
+      const cat = get()||'etc', qv = parseFloat($('cQty').value);
+      S.costs.push({id:uid(), date:$('cDate').value, cat, amount:a, memo:$('cMemo').value.trim(), qty: cat === 'fuel' && qv > 0 ? qv : undefined});
+      month = $('cDate').value.slice(0,7); save(); closeSheet(); render(); toast('비용 기록을 저장했어요'); });
+  });
+}
+/* 영수증 촬영 — 미리보기에서는 연료별 예시 영수증으로 인식 과정을 보여 줌.
+   실제 앱: 카메라 촬영 → 휴대폰 안에서 글자 인식(ML Kit) → 합계·날짜·항목·수량 찾기 → 사용자 확인 후 저장 */
+const RECEIPTS = {
+  gas:   {shop:'GORO 셀프주유소', kind:'유종', kindV:'휘발유', qty:41.2, unit:'L',   price:1650},
+  diesel:{shop:'GORO 셀프주유소', kind:'유종', kindV:'경유',   qty:45.1, unit:'L',   price:1520},
+  ev:    {shop:'GORO 급속충전소', kind:'충전', kindV:'DC콤보 급속', qty:32.5, unit:'kWh', price:347},
+  h2:    {shop:'GORO 수소충전소', kind:'연료', kindV:'수소', qty:4.2,  unit:'kg',  price:9900}
+};
+function scanSheet(){
+  const d = new Date(), date = ymd(d), time = pad(d.getHours())+':'+pad(d.getMinutes());
+  const rc = RECEIPTS[car().fuel] || RECEIPTS.gas, amount = Math.round(rc.qty * rc.price);
+  const R = {cat:'fuel', amount, date, qty:rc.qty, memo:rc.kindV};
+  openSheet(`<h3>영수증 인식 <span class="soon">NEW</span></h3>
+    <div class="shot" aria-label="예시 영수증 사진"><div class="receipt">
+      <div class="c"><b>${rc.shop}</b><br>(예시 영수증)</div><div class="hr"></div>
+      <div class="l" data-f="date"><span>일시</span><span>${date} ${time}</span></div>
+      <div class="l" data-f="cat"><span>${rc.kind}</span><span>${rc.kindV}</span></div>
+      <div class="l" data-f="qty"><span>${rc.unit === 'L' ? '수량' : '충전량'}</span><span>${rc.qty.toFixed(2)} ${rc.unit}</span></div>
+      <div class="l"><span>단가</span><span>${rc.price.toLocaleString('ko-KR')}</span></div><div class="hr"></div>
+      <div class="l" data-f="amount"><span><b>합계</b></span><span><b>${amount.toLocaleString('ko-KR')}원</b></span></div>
+      <div class="l"><span>결제</span><span>신용카드</span></div>
+    </div><div class="scanline" id="scanline"></div></div>
+    <p id="scanStatus" style="text-align:center;color:var(--muted);margin:0 0 12px">글자를 읽는 중…</p>
+    <div id="scanResult" hidden>
+      <dl class="found"><dt>항목</dt><dd>${fuel().cost} (${rc.kindV})</dd><dt>금액</dt><dd class="num">${won(amount)}</dd><dt>날짜</dt><dd class="num">${date}</dd><dt>${fuel().verb}</dt><dd class="num">${qtyText(rc.qty)}</dd></dl>
+      <p class="note" style="margin:0 0 14px">사진은 휴대폰 안에서만 인식하고 서버로 보내지 않아요. 내용이 맞는지 확인해 주세요.</p>
+      <div class="row"><button type="button" class="btn" id="scanEdit">고쳐서 저장</button><button type="button" class="btn pri" id="scanSave">이대로 저장</button></div>
+    </div>
+    <p class="note" style="text-align:center;margin-top:12px">미리보기에서는 ${fuel().t} 차량용 예시 영수증으로 인식 과정만 보여 드려요.</p>`, () => {
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(() => {
+      document.querySelectorAll('.receipt .l[data-f]').forEach(l => l.classList.add('hit'));
+      $('scanStatus').textContent = '4개 항목을 찾았어요';
+      $('scanResult').hidden = false;
+      $('scanEdit').onclick = () => costSheet(R);
+      $('scanSave').onclick = () => { S.costs.push({id:uid(), ...R}); month = R.date.slice(0,7); tab = 'costs'; save(); closeSheet(); render(); toast('영수증 내용을 저장했어요'); };
+    }, reduce ? 50 : 1700);
+  });
+}
+function carSheet(id){
+  const c = S.cars.find(x=>x.id===id);
+  openSheet(`<h3>차량 정보</h3><form id="fCar">
+    <div class="field"><label for="vName">차량명</label><input id="vName" value="${esc(c.name)}" maxlength="20" required></div>
+    <div class="field"><label for="vPlate">차량번호</label><input id="vPlate" value="${esc(c.plate)}" maxlength="12" required></div>
+    <div class="field"><label>연료</label>${segHTML('vFuel', Object.entries(FUELS).map(([v,f])=>({v,t:f.t})), c.fuel || 'gas')}</div>
+    <div class="field"><label for="vOdo">현재 주행거리 (km)</label><input id="vOdo" type="number" inputmode="numeric" min="0" value="${Math.round(c.odo)}" required></div>
+    <div class="row"><button type="button" class="btn" id="cancel">취소</button><button type="submit" class="btn pri">저장</button></div></form>`, () => {
+    const getFuel = bindSeg('vFuel');
+    $('cancel').onclick = closeSheet;
+    $('fCar').addEventListener('submit', e => { e.preventDefault();
+      c.name = $('vName').value.trim(); c.plate = $('vPlate').value.trim(); c.fuel = getFuel() || 'gas'; c.odo = Math.max(0, +$('vOdo').value || 0);
+      save(); closeSheet(); render(); toast('차량 정보를 저장했어요'); });
+  });
+}
+function proSheet(){
+  openSheet(`<h3>프리미엄 <span class="pro">PRO</span></h3>
+    <p style="margin:0 0 12px;color:var(--muted)">여러 차량 관리, PDF·CSV 보고서, 고급 통계와 백업을 쓸 수 있어요.</p>
+    <div class="stat" style="margin-bottom:14px"><div class="k">월 구독 (예정)</div><div class="v">₩2,900</div><div class="s">가격은 출시 전에 확정돼요</div></div>
+    <div class="row"><button type="button" class="btn" id="cancel">닫기</button><button type="button" class="btn pri" disabled>출시 후 이용 가능</button></div>`, () => { $('cancel').onclick = closeSheet; });
+}
+
+/* ── 출장 경비: 영수증만 찍으면 구분·사용처·금액·내역이 자동 정리되고, 회사 정산 엑셀 양식으로 내보냄 ── */
+const BIZ_CATS = ['숙박','주유','통행료','주차','식대','기타'];
+const BIZ_ICON = {'숙박':'숙','주유':'유','통행료':'통','주차':'주','식대':'식','기타':'기'};
+function bizNow(){ if (!S.biz || !S.biz.length) S.biz = [{id:'b1', name:'새 출장', place:'', start:ymd(new Date()), end:ymd(new Date()), members:['나']}]; S.bizExp = S.bizExp || []; S.bizId = S.bizId || S.biz[0].id; return S.biz.find(b=>b.id===S.bizId) || S.biz[0]; }
+const wd = (s) => '일월화수목금토'[new Date(s+'T00:00').getDay()];
+function bizRows(b){ return S.bizExp.filter(x=>x.biz===b.id).sort((a,c)=>a.date.localeCompare(c.date)); }
+function fileName(x,i){ return pad(i+1)+'_'+x.date.slice(5).replace('-','')+'_'+x.cat+'.jpg'; }
+function viewBiz(){
+  const b = bizNow(), R = bizRows(b), total = R.reduce((s,x)=>s+x.amount,0);
+  const byCat = BIZ_CATS.map(c=>({c, v:R.filter(x=>x.cat===c).reduce((s,x)=>s+x.amount,0)}));
+  const byPayer = b.members.map(p=>({p, v:R.filter(x=>x.payer===p).reduce((s,x)=>s+x.amount,0)}));
+  const missing = R.filter(x=>!x.receipt).length;
+  return `
+  <section class="trip">
+    <div class="t1"><div><h4>${esc(b.name)}</h4><div class="meta">${esc(b.place||'장소 미정')} · ${b.start.slice(5).replace('-','/')}~${b.end.slice(5).replace('-','/')} · ${b.members.map(esc).join(', ')}</div></div><button type="button" class="btn" id="bizEdit" style="padding:7px 10px;font-size:12.5px">수정</button></div>
+    <div class="sum">${won(total)}</div><div class="meta">영수증 ${R.length}장${missing?` · <span class="warn">영수증 미확보 ${missing}건</span>`:''}</div>
+    <div class="cats">${byCat.map(x=>`<div>${x.c}<b>${x.v?won(x.v):'-'}</b></div>`).join('')}</div>
+    <div class="payers">결제자별 법인카드 ${byPayer.map(x=>`<span>${esc(x.p)} <b>${won(x.v)}</b></span>`).join(' · ')}</div>
+  </section>
+  <button type="button" class="bigscan" id="bizScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>영수증 찍기</button>
+  <p class="note" style="margin:-6px 2px 0;text-align:center">찍기만 하면 구분·사용처·금액·내역이 자동으로 정리돼요</p>
+  ${R.length ? groupByDay(R.slice().reverse(), x => `
+    <div class="item"><div class="ico" style="color:var(--accent-text)">${BIZ_ICON[x.cat]}</div>
+      <div class="t"><b>${x.cat} · ${esc(x.shop)}</b><span>${esc(x.desc)} · ${esc(x.payer)}${x.qty?` · ${x.qty}L`:''}</span><br><span class="rcpt">${fileName(x,R.indexOf(x))}</span></div>
+      <div class="r"><span class="num">${won(x.amount)}</span></div>
+      <button type="button" class="del" data-del-biz="${x.id}" aria-label="이 경비 삭제">×</button></div>`) : '<p class="empty">아직 경비가 없어요. 영수증을 찍어 보세요.</p>'}
+  <section class="card"><p class="h2">회사 정산용 내보내기</p>
+    <div class="row"><button type="button" class="btn pri" id="bizExcel">엑셀 양식으로 보기</button></div>
+    <p class="note">출장 경비 양식(일자·요일·차수·구분·사용처·내역·결제자·결제수단·금액) 순서로 정리하고, 영수증 사진은 'No_일자_구분.jpg' 이름으로 모아 드려요.</p>
+  </section>`;
+}
+/* 미리보기용 예시 영수증 — 찍을 때마다 다른 종류가 나옴 */
+let bizScanN = 0;
+function bizSamples(){
+  const t = ymd(new Date());
+  return [
+    {lines:[['','청주 고깃집'],['일시',t.slice(5)+' 19:12'],['삼겹살 2인분','28,000'],['공기밥 2','2,000'],['합계','30,000원']], r:{date:t,cat:'식대',shop:'청주 고깃집',desc:'2인 저녁',amount:30000}, why:'저녁 시간 · 2인분'},
+    {lines:[['','한국도로공사'],['영업소','청주IC'],['일시',t.slice(5)+' 08:41'],['차종','1종'],['통행료','7,800원']], r:{date:t,cat:'통행료',shop:'한국도로공사 청주IC',desc:'하행 · 공동',amount:7800}, why:'도로공사 영수증'},
+    {lines:[['','청주 시티호텔'],['체크인',t.slice(5)],['객실','스탠다드 1인'],['숙박','1박'],['결제금액','72,000원']], r:{date:t,cat:'숙박',shop:'청주 시티호텔',desc:'1박 · 1인실',amount:72000}, why:'호텔 · 1박'},
+    {lines:[['','SK 청주셀프주유소'],['일시',t.slice(5)+' 17:55'],['유종','휘발유'],['수량','38.40 L'],['합계','63,360원']], r:{date:t,cat:'주유',shop:'SK 청주셀프주유소',desc:'휘발유 · 공동',amount:63360,qty:38.4}, why:'주유소 · 휘발유'}
+  ];
+}
+function bizScanSheet(){
+  const b = bizNow(), smp = bizSamples()[bizScanN++ % 4], r = {...smp.r};
+  openSheet(`<h3>영수증 인식</h3>
+    <div class="shot"><div class="receipt">${smp.lines.map(l => l[0] ? `<div class="l" data-f="1"><span>${l[0]}</span><span>${l[1]}</span></div>` : `<div class="c"><b>${l[1]}</b></div><div class="hr"></div>`).join('')}</div><div class="scanline"></div></div>
+    <p id="bs" style="text-align:center;color:var(--muted);margin:0 0 12px">글자를 읽는 중…</p>
+    <div id="br" hidden>
+      <dl class="found"><dt>구분</dt><dd>${r.cat} <span class="chip">${smp.why}</span></dd><dt>사용처</dt><dd>${esc(r.shop)}</dd><dt>내역</dt><dd>${esc(r.desc)}</dd><dt>금액</dt><dd class="num">${won(r.amount)}</dd></dl>
+      <div class="field" style="margin-top:8px"><label>결제자</label>${segHTML('bPayer', b.members.map(m=>({v:m,t:m})), '나')}</div>
+      <div class="row"><button type="button" class="btn" id="bAgain">다시 찍기</button><button type="button" class="btn pri" id="bSave">저장</button></div>
+    </div>`, () => {
+    const getP = bindSeg('bPayer');
+    setTimeout(() => {
+      document.querySelectorAll('.receipt .l[data-f]').forEach(l=>l.classList.add('hit'));
+      $('bs').textContent = '자동으로 분류했어요. 결제자만 확인해 주세요.'; $('br').hidden = false;
+      $('bAgain').onclick = bizScanSheet;
+      $('bSave').onclick = () => { S.bizExp.push({id:uid(), biz:b.id, ...r, payer:getP()||'나', receipt:true}); save(); closeSheet(); render(); toast(r.cat+' 경비를 저장했어요'); };
+    }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 50 : 1600);
+  });
+}
+function bizExcelSheet(){
+  const b = bizNow(), R = bizRows(b);
+  const tsv = R.map(x=>[x.date, wd(x.date), b.name, x.cat, x.shop, x.desc, x.payer, '법인카드', x.amount].join('\t')).join('\n');
+  openSheet(`<h3>출장 경비 · 엑셀 양식</h3>
+    <div class="tablewrap prev"><table><thead><tr><th>No</th><th>일자</th><th>요일</th><th>구분</th><th>사용처</th><th>내역</th><th>결제자</th><th class="n">금액</th><th>영수증 파일</th></tr></thead><tbody>
+    ${R.map((x,i)=>`<tr><td class="num">${i+1}</td><td class="num">${x.date.slice(5)}</td><td>${wd(x.date)}</td><td>${x.cat}</td><td>${esc(x.shop)}</td><td>${esc(x.desc)}</td><td>${esc(x.payer)}</td><td class="n">${x.amount.toLocaleString('ko-KR')}</td><td class="num">${fileName(x,i)}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="row" style="margin-top:12px"><button type="button" class="btn" id="cancel">닫기</button><button type="button" class="btn pri" id="copyTsv">엑셀용 복사</button></div>
+    <p class="note">엑셀 '출장 경비' 시트의 첫 빈 줄 '일자' 칸에 붙여 넣으면 일자~금액이 한 번에 들어가요. 실제 앱에서는 .xlsx 파일과 영수증 사진 묶음으로 바로 공유할 수 있게 만들 예정이에요.</p>
+    <textarea id="tsvBox" readonly hidden style="width:100%;height:110px;margin-top:8px;font:11px var(--mono);background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px"></textarea>`, () => {
+    $('cancel').onclick = closeSheet;
+    $('copyTsv').onclick = () => { const fb = () => { const t=$('tsvBox'); t.hidden=false; t.value=tsv; t.select(); toast('아래 내용을 길게 눌러 복사해 주세요'); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(tsv).then(()=>toast('엑셀용으로 복사했어요'), fb); else fb(); };
+  });
+}
+function bizEditSheet(){
+  const b = bizNow();
+  openSheet(`<h3>출장 정보</h3><form id="fBiz">
+    <div class="field"><label for="zName">출장 이름 (차수)</label><input id="zName" value="${esc(b.name)}" required></div>
+    <div class="field"><label for="zPlace">장소</label><input id="zPlace" value="${esc(b.place)}"></div>
+    <div class="two"><div class="field"><label for="zS">시작</label><input id="zS" type="date" value="${b.start}"></div><div class="field"><label for="zE">끝</label><input id="zE" type="date" value="${b.end}"></div></div>
+    <div class="field"><label for="zM">함께 가는 사람 (쉼표로 구분)</label><input id="zM" value="${esc(b.members.join(', '))}"></div>
+    <div class="row"><button type="button" class="btn" id="cancel">취소</button><button type="submit" class="btn pri">저장</button></div></form>`, () => {
+    $('cancel').onclick = closeSheet;
+    $('fBiz').addEventListener('submit', e => { e.preventDefault(); b.name=$('zName').value.trim()||b.name; b.place=$('zPlace').value.trim(); b.start=$('zS').value; b.end=$('zE').value;
+      const m=$('zM').value.split(',').map(x=>x.trim()).filter(Boolean); b.members = m.includes('나') ? m : ['나',...m]; save(); closeSheet(); render(); toast('출장 정보를 저장했어요'); });
+  });
+}
+const VIEWS = {home:viewHome, trips:viewTrips, costs:viewCosts, biz:viewBiz, report:viewReport, car:viewCar};
+
+function render(){
+  const c = car();
+  $('carName').textContent = c.name; $('carSub').textContent = c.plate + ' · ' + fuel().t;
+  $('mLabel').textContent = monthLabel();
+  $('main').innerHTML = VIEWS[tab]();
+  $('main').scrollTop = 0;
+  document.querySelectorAll('#tabs button').forEach(b => { if (b.dataset.tab === tab) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
+  $('fab').hidden = !(tab === 'trips' || tab === 'costs' || tab === 'home');
+  bindView();
+}
+function bindView(){
+  const cs = $('clearSample');
+  if (cs) cs.onclick = () => {
+    const bar = $('sampleBar');
+    bar.innerHTML = '<span>예시 기록을 모두 지울까요?</span><span class="confirm" style="margin-left:auto"><button type="button" class="btn" id="noClr" style="padding:6px 10px">취소</button><button type="button" class="btn pri" id="yesClr" style="padding:6px 10px">지우기</button></span>';
+    $('noClr').onclick = render;
+    $('yesClr').onclick = () => { const c = car(); S = {sample:false, cars:[{...c, odo:48210}], carId:c.id, trips:[], costs:[], biz:[{id:'b1', name:'새 출장', place:'', start:ymd(new Date()), end:ymd(new Date()), members:['나']}], bizExp:[], bizId:'b1'}; save(); render(); toast('예시 데이터를 지웠어요'); };
+  };
+  document.querySelectorAll('[data-del-trip]').forEach(b => b.onclick = () => { const t = S.trips.find(x=>x.id===b.dataset.delTrip); S.trips = S.trips.filter(x=>x!==t); if (t) car().odo = Math.max(0, car().odo - t.km); save(); render(); toast('운행 기록을 삭제했어요'); });
+  document.querySelectorAll('[data-del-cost]').forEach(b => b.onclick = () => { S.costs = S.costs.filter(x=>x.id!==b.dataset.delCost); save(); render(); toast('비용 기록을 삭제했어요'); });
+  document.querySelectorAll('[data-edit-car]').forEach(b => b.onclick = () => carSheet(b.dataset.editCar));
+  if ($('addCar')) $('addCar').onclick = proSheet;
+  if ($('openScan')) $('openScan').onclick = scanSheet;
+  if ($('bizScan')) $('bizScan').onclick = bizScanSheet;
+  if ($('bizExcel')) $('bizExcel').onclick = bizExcelSheet;
+  if ($('bizEdit')) $('bizEdit').onclick = bizEditSheet;
+  document.querySelectorAll('[data-del-biz]').forEach(x => x.onclick = () => { S.bizExp = S.bizExp.filter(e=>e.id!==x.dataset.delBiz); save(); render(); toast('경비를 삭제했어요'); });
+  if ($('rWork')) { $('rWork').onclick = () => { onlyWork = true; render(); }; $('rAll').onclick = () => { onlyWork = false; render(); }; }
+  if ($('copyCsv')) $('copyCsv').onclick = () => {
+    const text = csvText(), box = $('csvBox');
+    const fallback = () => { box.hidden = false; box.value = text; box.focus(); box.select(); toast('아래 내용을 길게 눌러 복사해 주세요'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => toast('CSV를 복사했어요'), fallback); else fallback();
+  };
+}
+$('tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; tab = b.dataset.tab; render(); });
+$('mPrev').onclick = () => shiftMonth(-1);
+$('mNext').onclick = () => shiftMonth(1);
+$('fab').onclick = () => {
+  if (tab === 'costs') return costSheet();
+  if (tab === 'trips') return tripSheet();
+  openSheet(`<h3>무엇을 기록할까요?</h3><div class="row"><button type="button" class="btn pri" id="pickTrip">운행 기록</button><button type="button" class="btn pri" id="pickCost">비용 기록</button></div>`, () => { $('pickTrip').onclick = tripSheet; $('pickCost').onclick = costSheet; });
+};
+render();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/gdtest/sw.js', { scope: '/gdtest/' }).catch(() => {});
+})();
+</script>
+</body>
+</html>
